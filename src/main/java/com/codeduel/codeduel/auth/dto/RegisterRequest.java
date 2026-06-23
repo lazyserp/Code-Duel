@@ -1,3 +1,5 @@
 package com.codeduel.codeduel.auth.dto;
 
- public record RegisterRequest(String username, String email , String password) {};
+import jakarta.validation.constraints.NotBlank;
+
+public record RegisterRequest(@NotBlank String username,@NotBlank String email ,@NotBlank String password) {};
