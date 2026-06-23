@@ -12,6 +12,7 @@ import com.codeduel.codeduel.auth.dto.LoginRequest;
 import com.codeduel.codeduel.auth.dto.RegisterRequest;
 import com.codeduel.codeduel.auth.service.AuthService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -21,7 +22,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) 
+    public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest request) 
     {
         AuthResponse res = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
@@ -29,7 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request)
+    public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest request)
     {
         AuthResponse res = authService.login(request);
 
