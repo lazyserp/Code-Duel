@@ -1,6 +1,6 @@
 package com.codeduel.codeduel.auth.service;
 
-import org.springframework.data.repository.config.CustomRepositoryImplementationDetector;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
