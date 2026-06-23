@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import io.jsonwebtoken.JwtException;
 
 
 @RestControllerAdvice
@@ -26,8 +27,16 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex)
     {
         String cleanMessage = ex.getBindingResult()
-                            .getFieldError()
-                            .getDefaultMessage();
+                            .getFieldError() != null ? ex.getBindingResult().getFieldError().getDefaultMessage() : "Validation Failed";
+                            
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(cleanMessage));
     }
+
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJwtException(JwtException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorResponse("Invalid or expired token"));
+}
+
 }
