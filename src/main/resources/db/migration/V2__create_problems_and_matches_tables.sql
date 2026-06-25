@@ -8,7 +8,7 @@ CREATE TABLE problems(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR NOT NULL,
     description VARCHAR NOT NULL,
-    difficulty difficulty_enum NOT NULL,
+    difficulty VARCHAR(50) NOT NULL,
     test_cases JSONB,
     starter_code JSONB
 );
