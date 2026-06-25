@@ -21,7 +21,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "matches")
-@Getter
+@Getter 
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
