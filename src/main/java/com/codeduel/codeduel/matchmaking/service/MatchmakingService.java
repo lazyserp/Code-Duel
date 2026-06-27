@@ -17,12 +17,17 @@ import com.codeduel.codeduel.arena.repository.MatchRepository;
 import com.codeduel.codeduel.arena.repository.ProblemRepository;
 import com.codeduel.codeduel.auth.model.User;
 import com.codeduel.codeduel.auth.repository.UserRepository;
-
+import com.codeduel.codeduel.matchmaking.event.MatchCreatedEvent;
 import lombok.RequiredArgsConstructor;
+
+
+import org.springframework.kafka.core.KafkaTemplate;
 
 @Service  
 @RequiredArgsConstructor  
 public class MatchmakingService {
+
+    private final KafkaTemplate<String, MatchCreatedEvent> kafkaTemplate;
 
     // Repository to fetch and persist user data from PostgreSQL
     private final UserRepository userRepository;
@@ -87,8 +92,13 @@ public class MatchmakingService {
                 .startedAt(LocalDateTime.now())   // Timestamp for timer/analytics
                 .build();
 
-        // Step 12: Persist match to database and return wrapped in Optional
-        return Optional.of(matchRepository.save(match));
+        // Step 12: Persist match to database and send an event in Kafka and then return wrapped in Optional
+        Match matchDetails = matchRepository.save(match);
+        MatchCreatedEvent matchEvent = new MatchCreatedEvent(matchDetails.getId(), matchDetails.getUser1().getId(), matchDetails.getUser2().getId(),matchDetails.getProblem().getId());
+
+        kafkaTemplate.send("match-created",matchEvent);
+
+        return Optional.of(matchDetails);
     }
 
     /**
