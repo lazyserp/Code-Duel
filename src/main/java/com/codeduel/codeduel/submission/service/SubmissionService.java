@@ -1,11 +1,5 @@
 package com.codeduel.codeduel.submission.service;
 
-import java.util.Optional;
-import java.util.UUID;
-
-import javax.naming.NameNotFoundException;
-
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 
 import com.codeduel.codeduel.arena.model.Match;
@@ -36,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 
             if (!user.getId().equals(match.getUser1().getId()) && !user.getId().equals(match.getUser2().getId()))
             {
-                throw new RuntimeException();
+                throw new RuntimeException("User is not a participant in this match");
             }
 
             Submission submission = Submission.builder()
@@ -55,6 +49,79 @@ import lombok.RequiredArgsConstructor;
             return submission;
                                                     
         }
-
-        
     }
+
+
+// ┌─────────────────────────────────────────────────────────────────┐
+// │                    CLIENT (Browser/Postman)                     │
+// └───────────────────────────┬─────────────────────────────────────┘
+//                             │
+//                 POST /api/submissions
+//                 Headers: Authorization: Bearer <JWT>
+//                 Body: {matchId, codeText, language}
+//                             │
+//                             ▼
+// ┌─────────────────────────────────────────────────────────────────┐
+// │               Spring Security Filter Chain                       │
+// │  1. Extract JWT from Authorization header                       │
+// │  2. Validate token (signature, expiration)                      │
+// │  3. Load User entity from database                              │
+// │  4. Inject into @AuthenticationPrincipal                        │
+// └───────────────────────────┬─────────────────────────────────────┘
+//                             │
+//                             ▼
+// ┌─────────────────────────────────────────────────────────────────┐
+// │                  SubmissionController                            │
+// │  submit(SubmissionRequest request, User user)                   │
+// │  - Receives deserialized request + authenticated user           │
+// │  - Delegates to service layer                                   │
+// └───────────────────────────┬─────────────────────────────────────┘
+//                             │
+//                             ▼
+// ┌─────────────────────────────────────────────────────────────────┐
+// │                   SubmissionService                              │
+// │                                                                  │
+// │  Step 1: Validate Match Exists                                  │
+// │    matchRepository.findById(matchId)                            │
+// │    ↓ Match found                                               │
+// │                                                                  │
+// │  Step 2: Validate Match is Active                               │
+// │    if (status != "ACTIVE") throw error                          │
+// │    ↓ Status = "ACTIVE"                                         │
+// │                                                                  │
+// │  Step 3: Validate User is Participant                           │
+// │    if (user != user1 && user != user2) throw error              │
+// │    ↓ User is player1                                           │
+// │                                                                  │
+// │  Step 4: Create Submission Entity                               │
+// │    Submission.builder()...                                      │
+// │    ↓ Built                                                     │
+// │                                                                  │
+// │  Step 5: Save to Database                                       │
+// │    repo.save(submission)                                        │
+// │    ↓ Saved to PostgreSQL                                       │
+// │                                                                  │
+// │  Step 6: Publish Event to Kafka                                 │
+// │    kafkaTemplate.send("submission-received", event)             │
+// │    ↓ Published                                                 │
+// │                                                                  │
+// │  Step 7: Return Submission                                      │
+// │    return submission                                            │
+// └───────────────────────────┬─────────────────────────────────────┘
+//                             │
+//             ┌───────────────┴────────────────┐
+//             │                                │
+//             ▼                                ▼
+// ┌────────────────────────┐      ┌────────────────────────┐
+// │   Return to Client     │      │   Kafka Topic          │
+// │   HTTP 200 OK          │      │   "submission-received"│
+// │   Body: Submission     │      │   Event stored        │
+// │   {                    │      └───────────┬────────────┘
+// │     id: "sub-123",     │                  │
+// │     status: "PENDING"  │                  │ (Async)
+// │   }                    │                  ▼
+// └────────────────────────┘      ┌────────────────────────┐
+//                                 │SubmissionReceivedConsumer│
+//                                 │  (Next step!)           │
+//                                 └────────────────────────┘
+

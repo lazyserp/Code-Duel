@@ -39,16 +39,16 @@ public class ArenaWebSocketController {
 
         log.info("Player {} is ready for match {}", username, matchId);
 
-        // 1. Add player to the Redis Set
+        // 1Add player to the Redis Set
         stringRedisTemplate.opsForSet().add(redisKey, username);
 
-        // 2. Check if both players are ready
+        //  Check if both players are ready
         Long readyCount = stringRedisTemplate.opsForSet().size(redisKey);
 
         if (readyCount != null && readyCount == 2) {
             log.info("Both players ready for match {}. Starting match...", matchId);
 
-            // 3. Fetch and update Match status in database
+            //  Fetch and update Match status in database
             Match match = matchRepository.findById(matchId)
                     .orElseThrow(() -> new IllegalArgumentException("Match not found: " + matchId));
             
@@ -58,13 +58,13 @@ public class ArenaWebSocketController {
                 matchRepository.save(match);
             }
 
-            // 4. Broadcast MATCH_READY (ACTIVE status)
+            // Broadcast MATCH_READY (ACTIVE status)
             simpMessagingTemplate.convertAndSend("/topic/match/" + matchId, new MatchReadyResponse(matchId, "ACTIVE"));
 
-            // 5. Clear the readiness set from Redis
+            // Clear the readiness set from Redis
             stringRedisTemplate.delete(redisKey);
 
-            // 6. Start countdown timer via the MatchManager
+            //  Start countdown timer via the MatchManager
             matchManager.startTimer(matchId);
         }
     }

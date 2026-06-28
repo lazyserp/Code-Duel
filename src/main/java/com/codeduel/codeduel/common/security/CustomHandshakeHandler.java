@@ -21,3 +21,42 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
         return null;
     }
 }
+
+
+// CLIENT CONNECTS
+//      |
+//      | ws://localhost:8080/ws?token=eyJhbGci...
+//      v
+// ┌─────────────────────────────────────────────────────┐
+// │  WebSocketAuthHandshakeInterceptor.beforeHandshake()│
+// │                                                     │
+// │  1. Extract token from URL query string             │
+// │  2. Decode JWT → get username                       │
+// │  3. Load user from database                         │
+// │  4. Validate token signature & expiration           │
+// │                                                     │
+// │  IF VALID:                                          │
+// │     - Create authentication object                  │
+// │     - Store in attributes.put("user", auth)         │
+// │     - Return TRUE                                   │
+// │                                                     │
+// │  IF INVALID:                                        │
+// │     - Log warning                                   │
+// │     - Return FALSE    (connection rejected)         │
+// └──────────────────┬──────────────────────────────────┘
+//                    │ Returns TRUE (success)
+//                    v
+// ┌─────────────────────────────────────────────────────┐
+// │  CustomHandshakeHandler.determineUser()             │
+// │                                                      │
+// │  1. Retrieve auth from attributes.get("user")       │
+// │  2. Cast to Principal                               │
+// │  3. Return Principal                                │
+// └──────────────────┬──────────────────────────────────┘
+//                    │ Returns Principal(username="john")
+//                    v
+// ┌─────────────────────────────────────────────────────┐
+// │  WebSocket Session Established                      │
+// │  - Principal attached to session                    │
+// │  - All future messages have user context            │
+// └─────────────────────────────────────────────────────┘
