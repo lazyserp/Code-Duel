@@ -8,6 +8,9 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class CustomHandshakeHandler extends DefaultHandshakeHandler {
 
     @Override

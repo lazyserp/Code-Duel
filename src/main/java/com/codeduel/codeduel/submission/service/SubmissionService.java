@@ -11,8 +11,10 @@ import com.codeduel.codeduel.submission.model.Submission;
 import com.codeduel.codeduel.submission.model.SubmissionStatus;
 import com.codeduel.codeduel.submission.repository.SubmissionRepository;
 
+import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 
+@Service
 @RequiredArgsConstructor
     public class SubmissionService {
         private final SubmissionRepository repo;

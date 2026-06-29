@@ -14,9 +14,12 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import com.codeduel.codeduel.auth.service.CustomUserDetailsService;
 import com.codeduel.codeduel.common.util.JwtService;
 
+import org.springframework.stereotype.Component;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketAuthHandshakeInterceptor implements HandshakeInterceptor {

@@ -13,7 +13,6 @@ import com.codeduel.codeduel.ai.dto.HintRequest;
 import com.codeduel.codeduel.ai.dto.HintResponse;
 import com.codeduel.codeduel.ai.service.AIHintService;
 import com.codeduel.codeduel.auth.model.User;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ public class AIHintController
     private final AIHintService aiService;
 
     @PostMapping("/{matchId}/hint")
-    public ResponseEntity<HintResponse> getHint(@PathVariable UUID matchId, @AuthenticationPrincipal User user, @RequestBody HintRequest request) throws JsonProcessingException
+    public ResponseEntity<HintResponse> getHint(@PathVariable UUID matchId, @AuthenticationPrincipal User user, @RequestBody HintRequest request)
     {
         HintResponse response = aiService.getOrCreateHint(matchId, user, request);
         return ResponseEntity.ok(response);
