@@ -1,25 +1,48 @@
 
+# Runs 7 services total:
+#   APP:   postgres, redis, kafka
+#   JUDGE0:   judge0-db, judge0-redis, judge0-server, judge0-workers
+
+
 services:
+
+  # APP'S DATABASE
+  # Stores: users, matches, submissions, problems, AI reviews, notifications
+  # Host port 5432 → Container port 5432
+
   postgres:
     image: postgres:15-alpine
     container_name: codeduel-db
-
     environment:
       POSTGRES_DB: codeduel
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: "12345678"
-
     ports:
       - "5432:5432"
-      
     volumes:
+      # Named volume: data persists even if the container is removed
       - postgres_data:/var/lib/postgresql/data
 
+
+  #APP'S REDIS
+  # Used for: matchmaking queues, live match state, leaderboard sorted set,
+  #           online status, AI hint cache
+  # Host port 6379 → Container port 6379
   redis:
     image: redis:7-alpine
     container_name: codeduel-redis
     ports:
       - "6379:6379"
+
+
+  # KAFKA (KRaft mode — no Zookeeper needed)
+  # Used for: async event bus between modules
+  # Events: MatchCreated, SubmissionReceived, SubmissionEvaluated, MatchFinished
+  #
+  # WHY SO MANY LISTENERS?
+  #   PLAINTEXT (port 29092)     → used by other containers inside Docker network
+  #   CONTROLLER (port 29093)    → internal Kafka controller election (KRaft)
+  #   PLAINTEXT_HOST (port 9092) → used by  Spring Boot app running on the host
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -28,6 +51,7 @@ services:
       - "9092:9092"
     environment:
       KAFKA_NODE_ID: 1
+      # This node acts as both a broker AND a controller (single-node KRaft setup)
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
       KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
@@ -36,11 +60,137 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
-      # Requisite base64 cluster ID for confluent Kraft startup
+
+      # Required fixed cluster ID for KRaft mode
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      # Set to 1 because we only have 1 broker (dev only use 3 in production)
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
+
+  # JUDGE0 SERVICES (Code Execution Engine)
+  # Judge0 is a self-contained system. It has its OWN separate database and
+  # Redis completely isolated from app's postgres and redis above.
+  # Spring Boot app only talks to judge0-server via HTTP on port 2358.
+
+  # JUDGE0'S OWN DATABASE (separate from app's postgres on 5432)
+  # Host port 5433 → Container port 5432
+  # Stores: Judge0's internal submission tokens and execution records
+
+  judge0-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: 12345678
+    ports:
+      # 5433 on host so it doesn't clash with app's postgres on 5432
+      - "5433:5432"
+    volumes:
+      - judge0_postgres_data:/var/lib/postgresql/data
+    networks:
+      - judge0-network
+
+
+  # JUDGE0'S OWN REDIS (separate from app's redis on 6379)
+  # Host port 6380 → Container port 6379
+  # Used by Judge0 internally as a job queue between server and workers
+
+  judge0-redis:
+    image: redis:7.0-alpine
+    ports:
+      # 6380 on host so it doesn't clash with app's redis on 6379
+      - "6380:6379"
+    networks:
+      - judge0-network
+
+
+  # JUDGE0 SERVER (the REST API Spring Boot calls)
+  # app sends code + test cases here → GET results back
+  # Endpoint: http://localhost:2358
+  #
+  # WHY privileged: true?
+  #   Judge0 uses Linux kernel features (cgroups, namespaces) to isolate
+  #   untrusted code in a sandbox. This ONLY works with elevated permissions.
+  #
+  # WHY REDIS_HOST and REDIS_PORT (not REDIS_URL)?
+  #   Judge0's internal startup script reads these two specific variables.
+  #   It completely ignores REDIS_URL 
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    privileged: true
+    restart: always
+    environment:
+      REDIS_HOST: judge0-redis   # Docker DNS resolves this to judge0-redis container
+      REDIS_PORT: 6379           # Internal container port (not 6380)
+      COUNT: 5                   # Number of parallel worker processes
+      AUTHN_TOKEN: ""            # Empty = no API key required  for local dev)
+      ENABLE_WAIT_RESULT: "true" # Allow synchronous wait for result in API response
+      POSTGRES_HOST: judge0-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: 12345678
+    ports:
+      - "2358:2358"
+    links:
+      # links: injects judge0-redis and judge0-db into /etc/hosts inside this container
+      # ensuring hostname resolution works even before Docker DNS is ready
+      - judge0-redis
+      - judge0-db
+    depends_on:
+      - judge0-db
+      - judge0-redis
+    networks:
+      - judge0-network
+
+
+  # JUDGE0 WORKERS (background code execution workers)
+  # Same image as judge0-server but runs a different entrypoint: ./scripts/workers
+  # These workers pull jobs from judge0-redis and actually execute the user's code
+  judge0-workers:
+    image: judge0/judge0:1.13.1
+    privileged: true
+    restart: always
+    environment:
+      REDIS_HOST: judge0-redis
+      REDIS_PORT: 6379
+      COUNT: 5
+      AUTHN_TOKEN: ""
+      ENABLE_WAIT_RESULT: "true"
+      POSTGRES_HOST: judge0-db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: 12345678
+    links:
+      - judge0-redis
+      - judge0-db
+    depends_on:
+      - judge0-db
+      - judge0-redis
+    # This is what differentiates workers from server  different startup script
+    command: ./scripts/workers
+    networks:
+      - judge0-network
+
+
+# VOLUMES
+# Named volumes persist data on disk even when containers are stopped/removed.
+# app data and Judge0's data are in separate volumes — never mixed.
+
 volumes:
-  postgres_data:
+  postgres_data:        # CodeDuel app data (users, matches, submissions)
+  judge0_postgres_data: # Judge0's internal data (execution tokens)
+
+
+# NETWORKS
+# judge0-network is an isolated bridge network for all Judge0 containers.
+# This ensures judge0-server, judge0-workers, judge0-db, and judge0-redis
+# can reach each other by hostname, but are logically separated from
+# app's services (postgres, redis, kafka).
+
+networks:
+  judge0-network:
+    driver: bridge
