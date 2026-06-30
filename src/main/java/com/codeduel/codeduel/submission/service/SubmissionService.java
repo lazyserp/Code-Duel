@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
             
             Match match = matchRepository.findById(request.matchId()) .orElseThrow(() -> new RuntimeException("Match not found !"));
             {
-                if ( match.getStatus() != "ACTIVE") throw new IllegalArgumentException();
+                if ( !match.getStatus().equals("ACTIVE")) throw new IllegalArgumentException();
             }
 
             if (!user.getId().equals(match.getUser1().getId()) && !user.getId().equals(match.getUser2().getId()))
