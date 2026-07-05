@@ -29,21 +29,20 @@ public class MatchmakingService {
 
     private final KafkaTemplate<String, MatchCreatedEvent> kafkaTemplate;
 
-    // Repository to fetch and persist user data from PostgreSQL
+    
     private final UserRepository userRepository;
-    
-    // Repository to fetch coding problems by difficulty from PostgreSQL
     private final ProblemRepository problemRepository;
-    
-    // Repository to save created match records to PostgreSQL
     private final MatchRepository matchRepository;
-    
-    // Redis template for interacting with Redis Sorted Sets (matchmaking queue)
     private final StringRedisTemplate redisTemplate;
 
     public Optional<Match> getActiveMatch(UUID userId)
     {
         return matchRepository.findActiveMatchByUserId(userId);
+    }
+
+    public Match getMatchEntity(UUID matchId)
+    {
+        return matchRepository.findById(matchId).orElseThrow( () ->  new IllegalArgumentException("Match Not Found !"));
     }
 
 
@@ -90,11 +89,11 @@ public class MatchmakingService {
 
         //  Build the Match entity with both users, selected problem, and metadata
         Match match = Match.builder()
-                .user1(user)                      // First player
-                .user2(opponent)                  // Matched opponent
-                .problem(selectedProblem)         // Coding challenge for this duel
-                .status("ACTIVE")                 // Match is now live
-                .startedAt(LocalDateTime.now())   // Timestamp for timer/analytics
+                .user1(user)                      
+                .user2(opponent)                  
+                .problem(selectedProblem)         
+                .status("ACTIVE")                 
+                .startedAt(LocalDateTime.now())   
                 .build();
 
         //  Persist match to database and send an event in Kafka and then return wrapped in Optional
