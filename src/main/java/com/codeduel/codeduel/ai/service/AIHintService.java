@@ -8,6 +8,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,9 @@ public class AIHintService {
     private final SubmissionRepository submissionRepository;
     private final AIHintRepository aiHintRepository;
     private final ChatModel chatModel;
+
+    @Value("${spring.ai.openai.chat.options.model}")
+    private String modelName ;
 
     public HintResponse getOrCreateHint(UUID matchId, User user, HintRequest request) {
         String redisKey = "match:" + matchId + ":user:" + user.getId() + ":hint";
@@ -93,7 +97,7 @@ public class AIHintService {
         // 6. Save to PostgreSQL database with token metadata
         AIHint aiHint = new AIHint(llmResponse, prompt);
         aiHint.setSubmissionId(latestSubmissionId);
-        aiHint.setModelUsed("meta/llama-3.1-8b-instruct");
+        aiHint.setModelUsed(modelName);
         aiHint.setTokensConsumed(totalTokens);
         aiHint = aiHintRepository.save(aiHint);
 
