@@ -155,11 +155,12 @@ public class Judge0service {
             String base64Source = Base64.getEncoder().encodeToString(sourceCode.getBytes(StandardCharsets.UTF_8));
 
             
+            log.info("Raw test cases JSON from DB: {}", testCasesJson);
             List<TestCase> testCases = objectMapper.readValue(testCasesJson, new TypeReference<List<TestCase>>() {});
             if (testCases == null || testCases.isEmpty()) {
                 throw new IllegalStateException("Problem has no test cases loaded.");
             }
-
+            log.info("Parsed test cases count: {}", testCases.size());
             
             List<Judge0SubmissionRequest> submissions = testCases.stream().map(tc -> {
                 String base64Input = Base64.getEncoder().encodeToString(tc.getInput().getBytes(StandardCharsets.UTF_8));
@@ -168,11 +169,14 @@ public class Judge0service {
             }).collect(Collectors.toList());
 
             Judge0BatchRequest requestBody = new Judge0BatchRequest(submissions);
+            log.info("Request payload: {}", objectMapper.writeValueAsString(requestBody));
 
             
+            String jsonBody = objectMapper.writeValueAsString(requestBody);
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Judge0BatchRequest> requestEntity = new HttpEntity<>(requestBody, headers);
+            HttpEntity<String> requestEntity = new HttpEntity<>(jsonBody, headers);
 
             String submitUrl = judge0Url + "/submissions/batch?base64_encoded=true";
             log.info("Sending batch submissions to Judge0 API at: {}", submitUrl);

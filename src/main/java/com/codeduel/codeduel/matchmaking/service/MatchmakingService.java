@@ -1,5 +1,6 @@
 package com.codeduel.codeduel.matchmaking.service;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +38,8 @@ public class MatchmakingService {
 
     public Optional<Match> getActiveMatch(UUID userId)
     {
-        return matchRepository.findActiveMatchByUserId(userId);
+        List<Match> matches = matchRepository.findActiveMatchByUserId(userId);
+        return matches.isEmpty() ? Optional.empty() : Optional.of(matches.get(0));
     }
 
     public Match getMatchEntity(UUID matchId)
