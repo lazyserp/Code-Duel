@@ -34,3 +34,4 @@ build/
 AGENTS.md
 .env
 system_documentation.md
+.jsconfig.jsconfig
