@@ -1,19 +1,15 @@
 package com.codeduel.codeduel.submission.service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,16 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class Judge0service {
+public class CodeExecutorService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${judge0.url:http://localhost:2358}")
-    private String judge0Url;
-
-    @Value("${judge0.language-id:62}") // Default to 62 (Java 13+) or 91 (Java 17) depending on container
-    private int languageId;
+    @Value("${executor.url:http://localhost:2358}")
+    private String executorUrl;
 
     // Static mapping of problem titles to their execution runner wrappers
     private static final Map<String, String> RUNNER_WRAPPERS = new HashMap<>();
@@ -142,134 +135,86 @@ public class Judge0service {
         );
     }
 
-    public ExecutionResult evaluate(String problemTitle, String testCasesJson, String userCodeText) {
+    public ExecutionResult evaluate(String problemTitle, String testCasesJson, String userCodeText, String language) {
         try {
-            
             String wrapper = RUNNER_WRAPPERS.get(problemTitle);
             if (wrapper == null) {
                 throw new IllegalArgumentException("No runner wrapper template found for problem: " + problemTitle);
             }
 
-            // 
-            String sourceCode = wrapper + "\n" + userCodeText;
+            // For non-java languages, we don't have wrappers seeded in Java.
+            // If it is Java, we prefix the wrapper runner class.
+            String sourceCode;
+            if ("java".equalsIgnoreCase(language)) {
+                sourceCode = wrapper + "\n" + userCodeText;
+            } else {
+                sourceCode = userCodeText;
+            }
+
             String base64Source = Base64.getEncoder().encodeToString(sourceCode.getBytes(StandardCharsets.UTF_8));
 
-            
             log.info("Raw test cases JSON from DB: {}", testCasesJson);
             List<TestCase> testCases = objectMapper.readValue(testCasesJson, new TypeReference<List<TestCase>>() {});
             if (testCases == null || testCases.isEmpty()) {
                 throw new IllegalStateException("Problem has no test cases loaded.");
             }
             log.info("Parsed test cases count: {}", testCases.size());
-            
-            List<Judge0SubmissionRequest> submissions = testCases.stream().map(tc -> {
+
+            List<ExecutorSubmissionRequest> submissions = testCases.stream().map(tc -> {
                 String base64Input = Base64.getEncoder().encodeToString(tc.getInput().getBytes(StandardCharsets.UTF_8));
                 String base64ExpectedOutput = Base64.getEncoder().encodeToString(tc.getOutput().getBytes(StandardCharsets.UTF_8));
-                return new Judge0SubmissionRequest(base64Source, languageId, base64Input, base64ExpectedOutput);
+                return new ExecutorSubmissionRequest(base64Source, language.toLowerCase(), base64Input, base64ExpectedOutput, 10, 256);
             }).collect(Collectors.toList());
 
-            Judge0BatchRequest requestBody = new Judge0BatchRequest(submissions);
-            log.info("Request payload: {}", objectMapper.writeValueAsString(requestBody));
-
-            
+            ExecutorBatchRequest requestBody = new ExecutorBatchRequest(submissions);
             String jsonBody = objectMapper.writeValueAsString(requestBody);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> requestEntity = new HttpEntity<>(jsonBody, headers);
 
-            String submitUrl = judge0Url + "/submissions/batch?base64_encoded=true";
-            log.info("Sending batch submissions to Judge0 API at: {}", submitUrl);
+            String submitUrl = executorUrl + "/execute";
+            log.info("Sending batch submissions to Custom Executor API at: {}", submitUrl);
 
-            ResponseEntity<List<Map<String, String>>> responseEntity = restTemplate.exchange(
+            ResponseEntity<ExecutorBatchResponse> responseEntity = restTemplate.postForEntity(
                 submitUrl,
-                HttpMethod.POST,
                 requestEntity,
-                new ParameterizedTypeReference<List<Map<String, String>>>() {}
+                ExecutorBatchResponse.class
             );
 
-            List<Map<String, String>> responseList = responseEntity.getBody();
-            if (responseList == null || responseList.isEmpty()) {
-                throw new RuntimeException("Failed to obtain execution tokens from Judge0.");
+            ExecutorBatchResponse responseBody = responseEntity.getBody();
+            if (responseBody == null || responseBody.getResults() == null || responseBody.getResults().isEmpty()) {
+                throw new RuntimeException("Failed to obtain execution results from Custom Executor.");
             }
 
-            List<String> tokens = responseList.stream()
-                .map(m -> m.get("token"))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            List<ExecutorExecutionResult> results = responseBody.getResults();
+            SubmissionStatus finalStatus = SubmissionStatus.ACCEPTED;
+            double maxTime = 0.0;
 
-            
-            return pollAndAggregateResults(tokens);
+            for (ExecutorExecutionResult res : results) {
+                double time = res.getTime() != null ? res.getTime() : 0.0;
+                if (time > maxTime) {
+                    maxTime = time;
+                }
 
-        } catch (Exception e) {
-            log.error("Execution error occurred during Judge0 integration: ", e);
-            return new ExecutionResult(SubmissionStatus.RUNTIME_ERROR, 0);
-        }
-    }
-
-    private ExecutionResult pollAndAggregateResults(List<String> tokens) throws Exception {
-        String tokenCsv = String.join(",", tokens);
-        String pollUrl = judge0Url + "/submissions/batch?tokens=" + tokenCsv + "&base64_encoded=true&fields=status,time,stderr,compile_output";
-
-        int maxAttempts = 15;
-        int attempt = 0;
-        List<Judge0ExecutionResult> results = new ArrayList<>();
-
-        while (attempt < maxAttempts) {
-            log.info("Polling Judge0 token statuses, attempt {}/{}", attempt + 1, maxAttempts);
-            ResponseEntity<Judge0BatchPollResponse> responseEntity = restTemplate.getForEntity(pollUrl, Judge0BatchPollResponse.class);
-            Judge0BatchPollResponse body = responseEntity.getBody();
-
-            if (body != null && body.getSubmissions() != null) {
-                results = body.getSubmissions();
-                boolean allFinished = results.stream().allMatch(res -> res.getStatus() != null && res.getStatus().getId() > 2);
-                if (allFinished) {
-                    break;
+                if (!"ACCEPTED".equalsIgnoreCase(res.getStatus())) {
+                    SubmissionStatus failedStatus;
+                    try {
+                        failedStatus = SubmissionStatus.valueOf(res.getStatus().toUpperCase());
+                    } catch (Exception e) {
+                        failedStatus = SubmissionStatus.RUNTIME_ERROR;
+                    }
+                    log.warn("Test case failed execution. Status: {}, Time: {}s", res.getStatus(), time);
+                    return new ExecutionResult(failedStatus, (int) (maxTime * 1000));
                 }
             }
 
-            attempt++;
-            Thread.sleep(1000); // Wait 1 second before next poll
+            return new ExecutionResult(finalStatus, (int) (maxTime * 1000));
+
+        } catch (Exception e) {
+            log.error("Execution error occurred during Custom Executor integration: ", e);
+            return new ExecutionResult(SubmissionStatus.RUNTIME_ERROR, 0);
         }
-
-        if (results.isEmpty()) {
-            throw new RuntimeException("Obtained empty response while polling execution results.");
-        }
-
-        // 7. Aggregate statuses
-        SubmissionStatus finalStatus = SubmissionStatus.ACCEPTED;
-        double maxTime = 0.0;
-
-        for (Judge0ExecutionResult res : results) {
-            if (res.getStatus() == null) {
-                continue;
-            }
-
-            int statusId = res.getStatus().getId();
-            double time = res.getTime() != null ? res.getTime() : 0.0;
-            if (time > maxTime) {
-                maxTime = time;
-            }
-
-            if (statusId != 3) { // 3 is Accepted
-                SubmissionStatus failedStatus = mapStatus(statusId);
-                log.warn("Test case failed execution. Status: {}, Time: {}s", res.getStatus().getDescription(), time);
-                // Prioritize WRONG_ANSWER, TLE, or COMPILE errors
-                return new ExecutionResult(failedStatus, (int) (maxTime * 1000));
-            }
-        }
-
-        return new ExecutionResult(finalStatus, (int) (maxTime * 1000));
-    }
-
-    private SubmissionStatus mapStatus(int judge0StatusId) {
-        return switch (judge0StatusId) {
-            case 3 -> SubmissionStatus.ACCEPTED;
-            case 4 -> SubmissionStatus.WRONG_ANSWER;
-            case 5 -> SubmissionStatus.TLE;
-            case 6 -> SubmissionStatus.COMPILATION_ERROR;
-            default -> SubmissionStatus.RUNTIME_ERROR;
-        };
     }
 
     // Inner DTO mappings
@@ -286,48 +231,41 @@ public class Judge0service {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Judge0SubmissionRequest {
+    public static class ExecutorSubmissionRequest {
         private String source_code;
-        private int language_id;
+        private String language;
         private String stdin;
         private String expected_output;
+        private int time_limit;
+        private int memory_limit;
     }
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Judge0BatchRequest {
-        private List<Judge0SubmissionRequest> submissions;
+    public static class ExecutorBatchRequest {
+        private List<ExecutorSubmissionRequest> submissions;
     }
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Judge0Status {
-        private int id;
-        private String description;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Judge0ExecutionResult {
-        private String token;
-        private Judge0Status status;
+    public static class ExecutorExecutionResult {
+        private String status;
         private Double time;
-        private String compile_output;
+        private int memory;
         private String stderr;
+        private String compile_output;
     }
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Judge0BatchPollResponse {
-        private List<Judge0ExecutionResult> submissions;
+    public static class ExecutorBatchResponse {
+        private List<ExecutorExecutionResult> results;
     }
 
     @Getter

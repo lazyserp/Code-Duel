@@ -8,7 +8,7 @@ import com.codeduel.codeduel.submission.event.SubmissionEvaluatedEvent;
 import com.codeduel.codeduel.submission.event.SubmissionReceivedEvent;
 import com.codeduel.codeduel.submission.model.Submission;
 import com.codeduel.codeduel.submission.repository.SubmissionRepository;
-import com.codeduel.codeduel.submission.service.Judge0service;
+import com.codeduel.codeduel.submission.service.CodeExecutorService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SubmissionReceivedConsumer {
 
-    private final Judge0service judge0service;
+    private final CodeExecutorService codeExecutorService;
     private final SubmissionRepository submissionRepository;
     private final KafkaTemplate<String, SubmissionEvaluatedEvent> kafkaTemplate;
 
@@ -31,11 +31,12 @@ public class SubmissionReceivedConsumer {
             Submission submission = submissionRepository.findById(event.submissionId())
                 .orElseThrow(() -> new IllegalArgumentException("Submission not found in database: " + event.submissionId()));
 
-            // Call Judge0 evaluation engine
-            Judge0service.ExecutionResult result = judge0service.evaluate(
+            // Call Code Executor evaluation engine
+            CodeExecutorService.ExecutionResult result = codeExecutorService.evaluate(
                 submission.getProblem().getTitle(),
                 submission.getProblem().getTestCases(),
-                event.code()
+                event.code(),
+                submission.getLanguage()
             );
 
             // Update database state
