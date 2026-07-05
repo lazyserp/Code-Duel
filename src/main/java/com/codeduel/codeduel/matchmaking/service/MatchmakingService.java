@@ -41,6 +41,11 @@ public class MatchmakingService {
     // Redis template for interacting with Redis Sorted Sets (matchmaking queue)
     private final StringRedisTemplate redisTemplate;
 
+    public Optional<Match> getActiveMatch(UUID userId)
+    {
+        return matchRepository.findActiveMatchByUserId(userId);
+    }
+
 
     public Optional<Match> joinQueue(UUID userId, Difficulty difficulty) {
         // Fetch user from database to get their current ELO rating

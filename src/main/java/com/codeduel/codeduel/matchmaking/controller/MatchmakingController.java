@@ -2,18 +2,20 @@ package com.codeduel.codeduel.matchmaking.controller;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codeduel.codeduel.arena.model.Match;
 import com.codeduel.codeduel.matchmaking.dto.MatchmakingRequest;
 
 import com.codeduel.codeduel.matchmaking.service.MatchmakingService;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +40,13 @@ public class MatchmakingController
         }
 
         return ResponseEntity.ok(match.get());        
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<?> getActiveMatch(@RequestParam UUID userId)
+    {
+        return ResponseEntity.ok(matchmakingService.getActiveMatch(userId));
+
     }
     
 }
