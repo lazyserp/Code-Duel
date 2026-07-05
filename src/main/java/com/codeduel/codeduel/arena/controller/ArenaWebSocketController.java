@@ -51,8 +51,11 @@ public class ArenaWebSocketController {
             //  Fetch and update Match status in database
             Match match = matchRepository.findById(matchId)
                     .orElseThrow(() -> new IllegalArgumentException("Match not found: " + matchId));
-            
-            if (!"ACTIVE".equals(match.getStatus())) {
+            if ( "FINISHED".equals(match.getStatus()))
+            {
+                return;
+            }
+            if (!"ACTIVE".equals(match.getStatus()) && !"FINISHED".equals(match.getStatus())) {
                 match.setStatus("ACTIVE");
                 match.setStartedAt(LocalDateTime.now());
                 matchRepository.save(match);
