@@ -13,7 +13,27 @@ function Arena() {
     const [code, setCode] = useState("");
     const [matchStatus, setMatchStatus] = useState("ACTIVE");
     const lastTypedRef = useRef(0);
+    const [submitting, setSubmitting] = useState(false);
 
+    async function handleSubmitCode()
+    {
+        setSubmitting(true);
+        const token = localStorage.getItem("token")
+        const matchId = localStorage.getItem("matchId");
+
+        try{
+            const response = await axios.post("http://localhost:8080/api/submissions",
+                                            {matchId,codeText:code,language:"java"},
+                                            {headers : {Authorization: `Bearer ${token}`} });
+        }
+        catch (error)
+        {
+            alert(error.message)
+        }
+        setSubmitting(false);
+
+
+    }
     function handleCodeChange(value)
     {
         setCode(value);
@@ -47,7 +67,10 @@ function Arena() {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setProblem(response.data.problem);
-                setCode(response.data.problem.starterCode.java || "");
+
+                const starterCodeObj = JSON.parse(response.data.problem.starterCode);
+                setCode(starterCodeObj.java || "");
+
                 setMatchStatus(response.data.status);
             } catch (error) {
                 console.error("Failed to load match details:", error);
@@ -66,15 +89,28 @@ function Arena() {
         stompClient.reconnectDelay = 5000;
 
 
-
+        //This runs whenver our WebSocket receives a message on the connected URL
         const callBack = (message) => {
             const data = JSON.parse(message.body);
-            if (data.secondsRemaining == 0)
+            if ( data.winnerId !== undefined)
             {
                 setMatchStatus("FINISHED");
                 localStorage.removeItem("matchId");
+                if ( data.winnerId == localStorage.getItem("userId")){
+                    alert("You Won !")
+                }
+                else alert("You Lost")
+            }
 
-                navigate("/lobby");         
+            if ( data.status !== undefined && data.status != "ACTIVE" && data.userId == localStorage.getItem("userId"))
+            {
+                alert("Code run Status: " + data.status)
+
+            }
+            if (data.secondsRemaining == 0)
+            {
+                setMatchStatus("FINISHED");
+                localStorage.removeItem("matchId");       
             }
             if ( data.secondsRemaining  !== undefined)
             {
@@ -139,6 +175,8 @@ function Arena() {
                 value={code}
                 onChange={handleCodeChange}
             />
+
+            <button onClick={handleSubmitCode} disabled={submitting}> {submitting ? "Running Tests..." : "Submit Code"}</button>
         </>
     );
 }
