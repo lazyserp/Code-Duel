@@ -4,7 +4,8 @@ import { Routes } from 'react-router-dom'
 import { Route } from 'react-router-dom'
 import Login from './components/Login'
 import Register from './components/Register'
-
+import Lobby from './components/Lobby'
+import Arena from './components/Arena'
 import './App.css'
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
       <Route path='/' element={<Login/>} />
       <Route path='/login' element={<Login/>} />
       <Route path='/register' element={<Register/>} />
+      <Route path='/lobby' element={<Lobby/>} />
+      <Route path='/arena' element={<Arena/>} />
      </Routes>
      </BrowserRouter>
   )
