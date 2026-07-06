@@ -47,6 +47,14 @@ public class User implements UserDetails {
     @Builder.Default
     private int currentElo = 1200; // ELO Ranking system
 
+    private int wins;
+    private int losses;
+    private int streak;
+
+    @Builder.Default
+    private String trend = "STAGNANT";
+    
+
 
     //Methods to check for the current user's authority
     @Override

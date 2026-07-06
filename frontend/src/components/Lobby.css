@@ -1,0 +1,153 @@
+/* d:\Wissen Practice\CodeDuel\codeduel\frontend\src\components\Lobby.css */
+
+.lobby-container {
+    width: 50%;
+    max-width: 50%;
+    margin: 80px auto;
+    padding: 40px;
+    background: #1e1e1e;
+    border-radius: 12px;
+    border: 1px solid #2d2d2d;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #e2e8f0;
+    text-align: center;
+}
+
+.lobby-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 0 0 6px 0;
+    background: linear-gradient(135deg, #ffffff, #e2b13c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.lobby-subtitle {
+    color: #858585;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+}
+
+.lobby-profile {
+    background: #151515;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.profile-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-label {
+    font-size: 0.75rem;
+    color: #858585;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.profile-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.profile-value.gold {
+    color: #e2b13c;
+}
+
+.lobby-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #cccccc;
+}
+
+.lobby-select {
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    color: #ffffff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.lobby-select:focus {
+    border-color: #e2b13c;
+}
+
+.lobby-status {
+    font-size: 0.95rem;
+    color: #e2b13c;
+    min-height: 24px;
+    margin: 10px 0;
+    font-weight: 500;
+}
+
+.lobby-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn-primary {
+    background: #10b981;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary:hover {
+    background: #059669;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-secondary {
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    color: #cccccc;
+    padding: 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #2d2d2d;
+    border-color: #e2b13c;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(226, 177, 60, 0.15);
+}

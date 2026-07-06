@@ -1,0 +1,359 @@
+/* d:\Wissen Practice\CodeDuel\codeduel\frontend\src\components\Leaderboard.css */
+
+.leaderboard-container {
+    width: 50%;
+    max-width: 50%;
+    margin: 40px auto;
+    padding: 32px 24px;
+    background: #1e1e1e;
+    border-radius: 12px;
+    border: 1px solid #2d2d2d;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #e2e8f0;
+}
+
+.leaderboard-header {
+    display: flex;
+
+    justify-content: center;
+    align-items: flex-end;
+    margin-bottom: 32px;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #252526;
+    border: 1px solid #3c3c3c;
+    color: #cccccc;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-top: 20px;
+}
+
+.back-btn:hover {
+    background: #2d2d2d;
+    border-color: #e2b13c;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(226, 177, 60, 0.15);
+}
+
+.title-section h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 0 0 6px 0;
+}
+
+.title-section p {
+    color: #858585;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Stats Cards Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: #1e1e1e;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(226, 177, 60, 0.3);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: rgba(226, 177, 60, 0.08);
+    color: #e2b13c;
+    border: 1px solid rgba(226, 177, 60, 0.15);
+}
+
+.stat-icon.green {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.stat-icon.blue {
+    background: rgba(56, 189, 248, 0.08);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.stat-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #858585;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+/* Table Design */
+.table-wrapper {
+    background: #1e1e1e;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.leaderboard-table th {
+    background: #151515;
+    padding: 16px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #858585;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #2d2d2d;
+}
+
+.leaderboard-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #252526;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: #cccccc;
+}
+
+.leaderboard-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.leaderboard-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* Player Column Layout */
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-avatar-initials {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #252526;
+    border: 2px solid #3c3c3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #e2b13c;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar-initials {
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.player-name {
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+/* Rank Styling */
+.rank-badge {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #858585;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+}
+
+/* ELO Styling */
+.elo-value {
+    font-weight: 700;
+    color: #e2b13c;
+}
+
+/* Streak and Trend */
+.streak-badge {
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.streak-win {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.streak-loss {
+    background: rgba(239, 68, 68, 0.08);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.trend-arrow {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.trend-up {
+    color: #10b981;
+}
+
+.trend-down {
+    color: #f87171;
+}
+
+.trend-stagnant {
+    color: #858585;
+}
+
+/* Current User Sticky Card */
+.current-user-card {
+    margin-top: 32px;
+    background: linear-gradient(135deg, rgba(226, 177, 60, 0.08) 0%, #1e1e1e 100%);
+    border: 1px solid rgba(226, 177, 60, 0.25);
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.user-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #2d2d2d;
+    padding-bottom: 10px;
+}
+
+.user-card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e2b13c;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.user-card-motto {
+    font-size: 0.85rem;
+    color: #858585;
+}
+
+.user-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-card-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-rank {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    min-width: 40px;
+}
+
+.user-card-right {
+    display: flex;
+    gap: 40px;
+}
+
+.user-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.user-stat-val {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f8fafc;
+}
+
+.user-stat-lbl {
+    font-size: 0.75rem;
+    color: #858585;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* Loading/Error states */
+.leaderboard-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    font-size: 1.2rem;
+    color: #e2b13c;
+}
+
+.spinner {
+    border: 4px solid rgba(226, 177, 60, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #e2b13c;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

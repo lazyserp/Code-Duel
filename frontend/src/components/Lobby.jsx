@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "./Lobby.css"
 
 function Lobby() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState("EASY");
     const [status, setStatus] = useState("");
     const username = localStorage.getItem("username");
+    const [elo,setElo] = useState(null)
 
     function startCountdown() {
         let count = 5;
@@ -57,9 +59,51 @@ function Lobby() {
         }
     }
 
+    useEffect( () => 
+    {
+        async function fetchData()
+        {
+
+        const token = localStorage.getItem("token")
+        try
+        {
+            const profileResponse = await axios.get("http://localhost:8080/api/users/me", {headers : {Authorization: `Bearer ${token}`}});
+            setElo(profileResponse.data.currentElo)
+        }
+        catch (error)
+        {
+            alert("not found" + error.message)
+        }
+
+        const userId = localStorage.getItem("userId");
+
+        async function checkForExistingMatch()
+        {
+            try{
+                const MatchResponse = await axios.get("http://localhost:8080/api/matchmaking/active?userId="+userId , 
+                                                    {headers : { Authorization : `Bearer ${token}`}});
+            if (MatchResponse.data){
+                localStorage.setItem("matchId",MatchResponse.data.id);
+                navigate("/arena");
+            }
+            }
+            finally
+            {
+                console.log("Sending to Arena !")
+            }
+        }
+
+        checkForExistingMatch()
+
+        }
+        fetchData();
+    },[])
+    
+
     return (
         <>
-            <h2>Welcome, {username}</h2>
+            <h2>Welcome, {username} </h2>
+            <h2>Curent Rating: {elo}</h2>
             <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
                 <option value="EASY">EASY</option>
                 <option value="MEDIUM">MEDIUM</option>
@@ -67,6 +111,7 @@ function Lobby() {
             </select>
             <p>{status}</p>
             <button onClick={handleJoin}>Join Match</button>
+            <button onClick={() => navigate("/leaderboard")} style={{ marginLeft: "10px" }}>View Leaderboard</button>
         </>
     );
 }

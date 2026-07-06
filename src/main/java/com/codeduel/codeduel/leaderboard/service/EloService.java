@@ -1,5 +1,6 @@
 package com.codeduel.codeduel.leaderboard.service;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ public class EloService {
 
     private final UserRepository userRepository;
     private static final int K_FACTOR = 32;
+    private final StringRedisTemplate redisTemplate;
 
     public record EloCalculationResult(
         int winnerEloBefore,
@@ -60,11 +62,34 @@ public class EloService {
             winner.getUsername(), winnerElo, newWinnerElo, winnerChange,
             loser.getUsername(), loserElo, newLoserElo, actualLoserChange, Math.round(mitigationRatio * 100));
 
-        //  Persist to Database
         winner.setCurrentElo(newWinnerElo);
         loser.setCurrentElo(newLoserElo);
+
+        if ( winner.getWins()  < 0) winner.setWins(1);
+        else winner.setWins((winner.getWins()+1));
+        winner.setTrend("UP");
+
+        if ( winner.getStreak() >= 0)
+        winner.setStreak(winner.getStreak()+1);
+        else winner.setStreak(1);
+
+        if ( loser.getLosses() < 0) loser.setLosses(0);
+        else loser.setLosses(loser.getLosses()+1);
+        loser.setTrend("DOWN");
+
+        if ( loser.getStreak() <= 0) loser.setStreak(loser.getStreak()-1);
+        else loser.setStreak(-1);
+
+
+        //  Persist to Database
+
         userRepository.save(winner);
         userRepository.save(loser);
+
+        redisTemplate.opsForZSet().add("leaderboard:global", winner.getUsername(),winner.getCurrentElo());
+        redisTemplate.opsForZSet().add("leaderboard:global",loser.getUsername(),loser.getCurrentElo());
+
+
 
         return new EloCalculationResult(
             winnerElo, newWinnerElo, winnerChange,

@@ -6,6 +6,7 @@ import Login from './components/Login'
 import Register from './components/Register'
 import Lobby from './components/Lobby'
 import Arena from './components/Arena'
+import Leaderboard from './components/Leaderboard'
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
       <Route path='/register' element={<Register/>} />
       <Route path='/lobby' element={<Lobby/>} />
       <Route path='/arena' element={<Arena/>} />
+      <Route path='/leaderboard' element={<Leaderboard/>} />
      </Routes>
      </BrowserRouter>
   )

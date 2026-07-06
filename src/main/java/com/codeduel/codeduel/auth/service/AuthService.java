@@ -1,5 +1,6 @@
 package com.codeduel.codeduel.auth.service;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,7 @@ public class AuthService
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final StringRedisTemplate redisTemplate;
 
     public AuthResponse register(RegisterRequest request)
     {
@@ -41,9 +43,10 @@ public class AuthService
                                 .email(request.email())
                                 .passwordHash(hashedPassword)
                                 .build();
+        userRepository.save(user);
+        redisTemplate.opsForZSet().add("leaderboard:global",user.getUsername(),user.getCurrentElo());
 
         
-        userRepository.save(user);
         var token = jwtService.generateToken(request.username());
 
         return new AuthResponse(token,request.username(),request.email(),user.getId().toString());

@@ -12,6 +12,7 @@ import com.codeduel.codeduel.auth.dto.LoginRequest;
 import com.codeduel.codeduel.auth.dto.RegisterRequest;
 import com.codeduel.codeduel.auth.service.AuthService;
 
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -35,8 +36,9 @@ public class AuthController {
         AuthResponse res = authService.login(request);
 
        return  ResponseEntity.ok(res);
-
     }
+
+
 
 
 
