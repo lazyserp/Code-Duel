@@ -101,18 +101,45 @@ function Lobby() {
     
 
     return (
-        <>
-            <h2>Welcome, {username} </h2>
-            <h2>Curent Rating: {elo}</h2>
-            <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-                <option value="EASY">EASY</option>
-                <option value="MEDIUM">MEDIUM</option>
-                <option value="HARD">HARD</option>
-            </select>
-            <p>{status}</p>
-            <button onClick={handleJoin}>Join Match</button>
-            <button onClick={() => navigate("/leaderboard")} style={{ marginLeft: "10px" }}>View Leaderboard</button>
-        </>
+        <div className="lobby-container">
+            <h1 className="lobby-title">Lobby</h1>
+            <p className="lobby-subtitle">Enter matchmaking for a 1v1 with a developer</p>
+
+            <div className="lobby-profile">
+                <div className="profile-item">
+                    <span className="profile-label">Competitor</span>
+                    <span className="profile-value">{username}</span>
+                </div>
+                <div className="profile-item">
+                    <span className="profile-label">Rating</span>
+                    <span className="profile-value gold">{elo !== null ? elo : "Loading..."}</span>
+                </div>
+            </div>
+
+            <div className="lobby-form">
+                <div className="form-group">
+                    <label className="form-label" htmlFor="difficulty-select">Select Difficulty</label>
+                    <select 
+                        id="difficulty-select"
+                        className="lobby-select" 
+                        value={difficulty} 
+                        onChange={(e) => setDifficulty(e.target.value)}
+                    >
+                        <option value="EASY">EASY</option>
+                        <option value="MEDIUM">MEDIUM</option>
+                        <option value="HARD">HARD</option>
+                    </select>
+                </div>
+
+                <p className="lobby-status">{status || "Ready for battle"}</p>
+
+                <div className="lobby-actions">
+                    <button className="btn-primary" onClick={handleJoin}>Join Match</button>
+                    <button className="btn-secondary" onClick={() => navigate("/leaderboard")}>View Leaderboard</button>
+                </div>
+            </div>
+        </div>
+        
     );
 }
 
