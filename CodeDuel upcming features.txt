@@ -1,0 +1,18 @@
+1. UI (Minimal developer-centric design matching the screenshots, flat slate canvas, top HUD)
+2. Leaderboard (Global ranking using Redis Sorted Sets)
+3. Ranks & Tiers (Bronze, Silver, Gold, Diamond, Ruby, and levels like Beginner 7 / Gold 18)
+4. Match with Friends (Private room creation via shareable URLs)
+5. Premium Sourcing for Tech Recruiters (B2B custom tournament dashboards)
+6. Real-time Test Case Tracking (Backend evaluates and broadcasts passed test counts, e.g. "12/16 tests", instead of simple fail-fast alerts)
+7. "Hint Nudge" Power-Up (A charge-based item enabling Socratic AI hint requests, tracking usage status in the match results)
+8. Detailed Post-Match Results Screen (Defeat/Victory modal showing rating changes, power-ups analysis, attempts timeline, practice actions, and sharing features)
+
+Launch on Subreddits & Indie Hacker Communities:
+Once your matchmaking and simple lobby are running, post on subreddits like r/cscareerquestions, r/learnprogramming, and r/webdev.
+The Hook: "I got tired of boring, lonely LeetCode practice, so I built a 1v1 real-time competitive coder arena. Looking for beta testers!"
+
+University CS Department Outreach:
+Message student leaders of computer science clubs. Offer them the ability to run a "Custom CodeDuel Tournament" for their members. It's free engagement for them and brings hundreds of active users to your database in one night.
+
+Host a "Launch Tournament":
+Set up a free-to-enter tournament with a small cash prize (e.g., $50) to build initial hype, capture emails, and test your concurrency limits.

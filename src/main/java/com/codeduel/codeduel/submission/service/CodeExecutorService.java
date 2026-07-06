@@ -190,6 +190,9 @@ public class CodeExecutorService {
             List<ExecutorExecutionResult> results = responseBody.getResults();
             SubmissionStatus finalStatus = SubmissionStatus.ACCEPTED;
             double maxTime = 0.0;
+            int passedCount = 0;
+            int totalCount = results.size();
+            SubmissionStatus firstFailedStatus = null;
 
             for (ExecutorExecutionResult res : results) {
                 double time = res.getTime() != null ? res.getTime() : 0.0;
@@ -197,23 +200,24 @@ public class CodeExecutorService {
                     maxTime = time;
                 }
 
-                if (!"ACCEPTED".equalsIgnoreCase(res.getStatus())) {
-                    SubmissionStatus failedStatus;
+                if ("ACCEPTED".equalsIgnoreCase(res.getStatus())) {
+                    passedCount++;
+                } else if (firstFailedStatus == null) {
                     try {
-                        failedStatus = SubmissionStatus.valueOf(res.getStatus().toUpperCase());
+                        firstFailedStatus = SubmissionStatus.valueOf(res.getStatus().toUpperCase());
                     } catch (Exception e) {
-                        failedStatus = SubmissionStatus.RUNTIME_ERROR;
+                        firstFailedStatus = SubmissionStatus.RUNTIME_ERROR;
                     }
                     log.warn("Test case failed execution. Status: {}, Time: {}s", res.getStatus(), time);
-                    return new ExecutionResult(failedStatus, (int) (maxTime * 1000));
                 }
             }
 
-            return new ExecutionResult(finalStatus, (int) (maxTime * 1000));
+            SubmissionStatus statusToReturn = (firstFailedStatus != null) ? firstFailedStatus : SubmissionStatus.ACCEPTED;
+            return new ExecutionResult(statusToReturn, (int) (maxTime * 1000), passedCount, totalCount);
 
         } catch (Exception e) {
             log.error("Execution error occurred during Custom Executor integration: ", e);
-            return new ExecutionResult(SubmissionStatus.RUNTIME_ERROR, 0);
+            return new ExecutionResult(SubmissionStatus.RUNTIME_ERROR, 0, 0, 0);
         }
     }
 
@@ -273,5 +277,7 @@ public class CodeExecutorService {
     public static class ExecutionResult {
         private final SubmissionStatus status;
         private final int executionTimeMs;
+        private final int passedCount;
+        private final int totalCount;
     }
 }

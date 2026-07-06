@@ -14,11 +14,40 @@ function Arena() {
     const [matchStatus, setMatchStatus] = useState("ACTIVE");
     const lastTypedRef = useRef(0);
     const [submitting, setSubmitting] = useState(false);
+    const [hint, setHint] = useState("");
+    const [fetchingHint, setFetchingHint] = useState(false);
+
+    async function handleGetHint()
+    {
+        setFetchingHint(true);
+        const token = localStorage.getItem("token");
+        const matchId = localStorage.getItem("matchId");
+
+        try{
+
+        const response = await axios.post(`http://localhost:8080/api/matches/${matchId}/hint`,
+                                        {codeText:code},
+                                        {headers : {Authorization: `Bearer ${token}`}});
+        setHint(response.data.hintText);
+        
+        }
+        catch (error)
+        {
+            alert("Error :" + error.message);
+        }
+        finally{
+            setFetchingHint(false);
+
+
+        }
+
+        
+    }
 
     async function handleSubmitCode()
     {
         setSubmitting(true);
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("token");
         const matchId = localStorage.getItem("matchId");
 
         try{
@@ -28,9 +57,10 @@ function Arena() {
         }
         catch (error)
         {
-            alert(error.message)
+            alert(error.message);
+            setSubmitting(false);
+
         }
-        setSubmitting(false);
 
 
     }
@@ -105,6 +135,7 @@ function Arena() {
             if ( data.status !== undefined && data.status != "ACTIVE" && data.userId == localStorage.getItem("userId"))
             {
                 alert("Code run Status: " + data.status)
+                setSubmitting(false);
 
             }
             if (data.secondsRemaining == 0)
@@ -176,6 +207,8 @@ function Arena() {
                 onChange={handleCodeChange}
             />
 
+            <button onClick={handleGetHint} disabled={fetchingHint || matchStatus == "FINISHED"}> {fetchingHint ? "Getting Hint from AI" : "Get Hint"}</button>
+            { hint && <div> {hint} </div>}
             <button onClick={handleSubmitCode} disabled={submitting}> {submitting ? "Running Tests..." : "Submit Code"}</button>
         </>
     );

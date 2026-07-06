@@ -14,6 +14,11 @@ import com.codeduel.codeduel.arena.service.MatchManager;
 import com.codeduel.codeduel.auth.model.User;
 import com.codeduel.codeduel.auth.repository.UserRepository;
 import com.codeduel.codeduel.submission.event.SubmissionEvaluatedEvent;
+import com.codeduel.codeduel.submission.model.Submission;
+import com.codeduel.codeduel.submission.repository.SubmissionRepository;
+import com.codeduel.codeduel.leaderboard.service.EloService;
+import com.codeduel.codeduel.leaderboard.service.EloService.EloCalculationResult;
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,16 +32,18 @@ public class SubmissionEvaluatedConsumer {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final MatchManager matchManager;
+    private final SubmissionRepository submissionRepository;
+    private final EloService eloService;
 
     @KafkaListener(topics = "submission-evaluated", groupId = "arena-evaluation-group")
     public void consume(SubmissionEvaluatedEvent event) {
         UUID matchId = event.matchId();
         log.info("Received submission-evaluated event for match: {}, status: {}", matchId, event.status());
 
-        // 1. Broadcast the submission result to both players
+        //  Broadcast the submission result to both players
         simpMessagingTemplate.convertAndSend("/topic/match/" + matchId, event);
 
-        // 2. If status is ACCEPTED, mark the match as finished
+        // If status is ACCEPTED, mark the match as finished
         if ("ACCEPTED".equalsIgnoreCase(event.status())) {
             try {
                 Match match = matchRepository.findById(matchId)
@@ -56,8 +63,28 @@ public class SubmissionEvaluatedConsumer {
                     // Stop the active countdown timer
                     matchManager.stopTimer(matchId);
 
-                    // Broadcast MATCH_ENDED event
-                    simpMessagingTemplate.convertAndSend("/topic/match/" + matchId, new MatchEndedResponse(matchId, event.userId()));
+                    // Find the loser and calculate ELO changes
+                    User loser = winner.getId().equals(match.getUser1().getId()) ? match.getUser2() : match.getUser1();
+                    List<Submission> submissions = submissionRepository.findByMatchId(matchId);
+                    int loserPassed = submissions.stream()
+                        .filter(s -> s.getUser().getId().equals(loser.getId()))
+                        .map(s -> s.getPassedCount() != null ? s.getPassedCount() : 0)
+                        .max(Integer::compare)
+                        .orElse(0);
+
+                    EloCalculationResult eloResult = eloService.updateRatings(winner, loser, loserPassed, event.totalCount());
+
+                    // Broadcast MATCH_ENDED event with ELO updates
+                    simpMessagingTemplate.convertAndSend("/topic/match/" + matchId, new MatchEndedResponse(
+                        matchId,
+                        winner.getId(),
+                        eloResult.winnerEloBefore(),
+                        eloResult.winnerEloAfter(),
+                        eloResult.winnerChange(),
+                        eloResult.loserEloBefore(),
+                        eloResult.loserEloAfter(),
+                        eloResult.loserChange()
+                    ));
                 }
             } catch (Exception e) {
                 log.error("Failed to finalize match completion state for match: {}", matchId, e);

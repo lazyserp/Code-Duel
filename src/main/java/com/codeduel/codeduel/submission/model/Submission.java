@@ -61,6 +61,9 @@ public class Submission {
 
     private Integer executionTime;
 
+    private Integer passedCount;
+    private Integer totalCount;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

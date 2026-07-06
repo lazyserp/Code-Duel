@@ -10,5 +10,7 @@ public record SubmissionEvaluatedEvent(
     UUID matchId,
     UUID userId,
     String status,
-    int executionTime
+    int executionTime,
+    int passedCount,
+    int totalCount
 ){};

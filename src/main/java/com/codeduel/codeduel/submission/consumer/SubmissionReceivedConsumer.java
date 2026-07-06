@@ -42,10 +42,12 @@ public class SubmissionReceivedConsumer {
             // Update database state
             submission.setStatus(result.getStatus());
             submission.setExecutionTime(result.getExecutionTimeMs());
+            submission.setPassedCount(result.getPassedCount());
+            submission.setTotalCount(result.getTotalCount());
             submissionRepository.save(submission);
 
-            log.info("Submission {} evaluated with status: {} (time: {}ms)", 
-                submission.getId(), result.getStatus(), result.getExecutionTimeMs());
+            log.info("Submission {} evaluated with status: {} (time: {}ms, passed: {}/{})", 
+                submission.getId(), result.getStatus(), result.getExecutionTimeMs(), result.getPassedCount(), result.getTotalCount());
 
             //  Publish conclusion event to submission-evaluated topic
             SubmissionEvaluatedEvent evaluatedEvent = SubmissionEvaluatedEvent.builder()
@@ -54,6 +56,8 @@ public class SubmissionReceivedConsumer {
                 .userId(submission.getUser().getId())
                 .status(result.getStatus().name())
                 .executionTime(result.getExecutionTimeMs())
+                .passedCount(result.getPassedCount())
+                .totalCount(result.getTotalCount())
                 .build();
 
             kafkaTemplate.send("submission-evaluated", evaluatedEvent);
