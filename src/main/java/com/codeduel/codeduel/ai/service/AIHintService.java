@@ -40,6 +40,9 @@ public class AIHintService {
     @Value("${spring.ai.openai.chat.options.model}")
     private String modelName ;
 
+    @Value("${spring.ai.openai.api-key}")
+    private String apiKeyProp;
+
     public HintResponse getOrCreateHint(UUID matchId, User user, HintRequest request) {
         String redisKey = "match:" + matchId + ":user:" + user.getId() + ":hint";
         String cachedHintText = redisTemplate.opsForValue().get(redisKey);
@@ -82,17 +85,29 @@ public class AIHintService {
 
         log.info("Requesting Socratic hint from LLM for user: {}", user.getUsername());
 
-        // 5. Call LLM (NVIDIA NIM) capturing ChatResponse
-        ChatResponse chatResponse = chatModel.call(new Prompt(prompt));
-        String llmResponse = chatResponse.getResult().getOutput().getText();
+        String llmResponse;
+        int totalTokens = 0;
+        try {
+            if (apiKeyProp == null || "mock-key".equalsIgnoreCase(apiKeyProp) || apiKeyProp.trim().isEmpty()) {
+                throw new IllegalStateException("spring.ai.openai.api-key property is not configured");
+            }
 
-        // Extract usage metadata from response
-        Usage usage = chatResponse.getMetadata().getUsage();
-        int totalTokens = (usage != null && usage.getTotalTokens() != null) ? usage.getTotalTokens() : 0;
-        log.info("Token usage for hint: total={}, prompt={}, completion={}", 
-                totalTokens, 
-                usage != null ? usage.getPromptTokens() : 0, 
-                usage != null ? usage.getCompletionTokens() : 0);
+            ChatResponse chatResponse = chatModel.call(new Prompt(prompt));
+            llmResponse = chatResponse.getResult().getOutput().getText();
+            Usage usage = chatResponse.getMetadata().getUsage();
+            totalTokens = (usage != null && usage.getTotalTokens() != null) ? usage.getTotalTokens() : 0;
+
+            log.info("Token usage for hint: total={}, prompt={}, completion={}", 
+                    totalTokens, 
+                    usage != null ? usage.getPromptTokens() : 0, 
+                    usage != null ? usage.getCompletionTokens() : 0);
+        } catch (Exception e) {
+            log.warn("Failed to retrieve live AI hint: {}. Using offline Socratic fallback helper.", e.getMessage());
+            llmResponse = "Offline Coach Hint: Analyze the problem constraints for '" + problem.getTitle() + 
+                          "'. Verify your loop bounds, watch out for boundary check violations, " +
+                          "and check if recursion base cases are terminating properly.";
+            totalTokens = 30;
+        }
 
         // 6. Save to PostgreSQL database with token metadata
         AIHint aiHint = new AIHint(llmResponse, prompt);

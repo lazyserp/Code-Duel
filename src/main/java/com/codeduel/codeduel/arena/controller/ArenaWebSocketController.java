@@ -14,9 +14,14 @@ import com.codeduel.codeduel.arena.dto.MatchReadyResponse;
 import com.codeduel.codeduel.arena.dto.ReadyRequest;
 import com.codeduel.codeduel.arena.dto.TypingRequest;
 import com.codeduel.codeduel.arena.dto.TypingResponse;
+import com.codeduel.codeduel.arena.dto.MatchEndedResponse;
 import com.codeduel.codeduel.arena.model.Match;
 import com.codeduel.codeduel.arena.repository.MatchRepository;
 import com.codeduel.codeduel.arena.service.MatchManager;
+import com.codeduel.codeduel.auth.model.User;
+import com.codeduel.codeduel.auth.repository.UserRepository;
+import com.codeduel.codeduel.leaderboard.service.EloService;
+import com.codeduel.codeduel.leaderboard.service.EloService.EloCalculationResult;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +35,8 @@ public class ArenaWebSocketController {
     private final StringRedisTemplate stringRedisTemplate;
     private final MatchRepository matchRepository;
     private final MatchManager matchManager;
+    private final UserRepository userRepository;
+    private final EloService eloService;
 
     @MessageMapping("/match/ready")
     public void matchReady(@Payload ReadyRequest request, Principal principal) {
@@ -77,5 +84,45 @@ public class ArenaWebSocketController {
         String username = principal.getName();
         TypingResponse response = new TypingResponse(request.matchId(), username);
         simpMessagingTemplate.convertAndSend("/topic/match/" + request.matchId(), response);
+    }
+
+    @MessageMapping("/match/forfeit")
+    public void matchForfeit(@Payload ReadyRequest request, Principal principal) {
+        String username = principal.getName();
+        UUID matchId = request.matchId();
+        log.info("Player {} requested forfeit for match {}", username, matchId);
+
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new IllegalArgumentException("Match not found: " + matchId));
+
+        if (!"ACTIVE".equals(match.getStatus())) {
+            log.warn("Cannot forfeit match {} in status {}", matchId, match.getStatus());
+            return;
+        }
+
+        User loser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+        
+        User winner = match.getUser1().getId().equals(loser.getId()) ? match.getUser2() : match.getUser1();
+
+        match.setStatus("FINISHED");
+        match.setWinner(winner);
+        match.setEndedAt(LocalDateTime.now());
+        matchRepository.save(match);
+
+        matchManager.stopTimer(matchId);
+
+        EloCalculationResult eloResult = eloService.updateRatings(winner, loser, 0, 0);
+
+        simpMessagingTemplate.convertAndSend("/topic/match/" + matchId, new MatchEndedResponse(
+                matchId,
+                winner.getId(),
+                eloResult.winnerEloBefore(),
+                eloResult.winnerEloAfter(),
+                eloResult.winnerChange(),
+                eloResult.loserEloBefore(),
+                eloResult.loserEloAfter(),
+                eloResult.loserChange()
+        ));
     }
 }
