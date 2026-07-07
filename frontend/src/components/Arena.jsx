@@ -21,17 +21,22 @@ function Arena() {
     const [consoleOpen, setConsoleOpen] = useState(false);
     const [consoleHeight, setConsoleHeight] = useState(200);
     const isResizingRef = useRef(false);
+    const startYRef = useRef(0);
+    const startHeightRef = useRef(200);
 
     const handleMouseDown = (e) => {
         e.preventDefault();
         isResizingRef.current = true;
+        startYRef.current = e.clientY;
+        startHeightRef.current = consoleHeight;
         document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
     };
 
     const handleMouseMove = (e) => {
         if (!isResizingRef.current) return;
-        const newHeight = window.innerHeight - e.clientY;
+        const deltaY = startYRef.current - e.clientY;
+        const newHeight = startHeightRef.current + deltaY;
         if (newHeight > 100 && newHeight < window.innerHeight * 0.8) {
             setConsoleHeight(newHeight);
         }
