@@ -25,9 +25,7 @@ function Landing() {
 
             {/* Hero Section */}
             <section className="hero-section">
-                <div className="hero-badge">
-                    <span>👾</span> Next-Gen Code Battles Powered by AI
-                </div>
+
                 <h1 className="hero-title">Next-Gen Coding Battles </h1>
                 <p className="hero-subtitle">
                     Experience unparalleled efficiency and precision with Socratic coding tools tailored to streamline 
