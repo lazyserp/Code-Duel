@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Leaderboard.css";
 
+import { API_BASE_URL } from "../config";
+
 function Leaderboard() {
     const navigate = useNavigate();
     const [data, setData] = useState(null);
@@ -13,7 +15,7 @@ function Leaderboard() {
         async function fetchLeaderboard() {
             try {
                 const token = localStorage.getItem("token");
-                const response = await axios.get("http://localhost:8080/api/leaderboard", {
+                const response = await axios.get(`${API_BASE_URL}/api/leaderboard`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setData(response.data);

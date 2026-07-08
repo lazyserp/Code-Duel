@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Editor } from "@monaco-editor/react";
 import { Client } from "@stomp/stompjs";
 import "./Arena.css";
+import { API_BASE_URL, WS_BASE_URL } from "../config";
 
 
 
@@ -165,7 +166,7 @@ function Arena() {
         const matchId = localStorage.getItem("matchId");
         try {
             const response = await axios.post(
-                `http://localhost:8080/api/matches/${matchId}/hint`,
+                `${API_BASE_URL}/api/matches/${matchId}/hint`,
                 { codeText: code },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -185,7 +186,7 @@ function Arena() {
         const matchId = localStorage.getItem("matchId");
         try {
             await axios.post(
-                "http://localhost:8080/api/submissions",
+                `${API_BASE_URL}/api/submissions`,
                 { matchId, codeText: code, language: language },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -223,7 +224,7 @@ function Arena() {
             const token = localStorage.getItem("token");
             try {
                 const response = await axios.get(
-                    `http://localhost:8080/api/matchmaking/${matchId}`,
+                    `${API_BASE_URL}/api/matchmaking/${matchId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
                 setProblem(response.data.problem);
@@ -249,7 +250,7 @@ function Arena() {
         if (!matchId) return;
         const token = localStorage.getItem("token");
         const stompClient = new Client();
-        stompClient.brokerURL = `ws://localhost:8080/ws?token=${token}`;
+        stompClient.brokerURL = `${WS_BASE_URL}?token=${token}`;
         stompClient.reconnectDelay = 5000;
 
         const callBack = (message) => {

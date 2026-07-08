@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Lobby.css"
+import { API_BASE_URL } from "../config";
 
 function Lobby() {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ function Lobby() {
             localStorage.setItem("language", language);
 
             const response = await axios.post(
-                "http://localhost:8080/api/matchmaking/join",
+                `${API_BASE_URL}/api/matchmaking/join`,
                 { userId, difficulty },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -42,7 +43,7 @@ function Lobby() {
 
                 const intervalId = setInterval(async () => {
                     const resp = await axios.get(
-                        `http://localhost:8080/api/matchmaking/active?userId=${userId}`,
+                        `${API_BASE_URL}/api/matchmaking/active?userId=${userId}`,
                         { headers: { Authorization: `Bearer ${token}` } }
                     );
                     if (resp.data) {
@@ -69,7 +70,7 @@ function Lobby() {
         const token = localStorage.getItem("token")
         try
         {
-            const profileResponse = await axios.get("http://localhost:8080/api/users/me", {headers : {Authorization: `Bearer ${token}`}});
+            const profileResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {headers : {Authorization: `Bearer ${token}`}});
             setElo(profileResponse.data.currentElo)
         }
         catch (error)
@@ -82,7 +83,7 @@ function Lobby() {
         async function checkForExistingMatch()
         {
             try{
-                const MatchResponse = await axios.get("http://localhost:8080/api/matchmaking/active?userId="+userId , 
+                const MatchResponse = await axios.get(`${API_BASE_URL}/api/matchmaking/active?userId=`+userId , 
                                                     {headers : { Authorization : `Bearer ${token}`}});
             if (MatchResponse.data){
                 localStorage.setItem("matchId",MatchResponse.data.id);

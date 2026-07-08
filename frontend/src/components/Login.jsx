@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Auth.css";
 
+import { API_BASE_URL } from "../config";
+
 function Login() {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
@@ -11,7 +13,7 @@ function Login() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:8080/api/auth/login", {
+            const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
                 username,
                 password
             });
