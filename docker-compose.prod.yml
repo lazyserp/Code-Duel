@@ -71,7 +71,7 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - CODE_EXECUTOR_URL=http://codeduel-executor:3000
+      - EXECUTOR_URL=http://codeduel-executor:3000
     depends_on:
       - postgres
       - redis
