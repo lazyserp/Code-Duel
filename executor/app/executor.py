@@ -17,6 +17,116 @@ _LANG_MAP = {
 }
 
 
+def _wrap_source(source: str, language: str, is_array: bool) -> str:
+    if language == "java":
+        if is_array:
+            driver = """import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        if (!sc.hasNextLine()) return;
+        String line = sc.nextLine().replaceAll("[\\\\\\\\[\\\\\\\\]]", "");
+        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(",")).map(String::trim).mapToInt(Integer::parseInt).toArray();
+        Solution solution = new Solution();
+        Object res = solution.solve(nums);
+        System.out.println(res);
+    }
+}
+"""
+        else:
+            driver = """import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String s = sc.hasNextLine() ? sc.nextLine() : "";
+        Solution solution = new Solution();
+        Object res = solution.solve(s);
+        System.out.println(res);
+    }
+}
+"""
+        return driver + "\n" + source
+
+    elif language == "python":
+        if is_array:
+            driver = """
+import sys
+if __name__ == "__main__":
+    line = sys.stdin.read().strip()
+    line = line.replace('[', '').replace(']', '')
+    nums = [int(x.strip()) for x in line.split(',') if x.strip()] if line else []
+    sol = Solution()
+    res = sol.solve(nums)
+    if isinstance(res, bool):
+        print(str(res).lower())
+    else:
+        print(res)
+"""
+        else:
+            driver = """
+import sys
+if __name__ == "__main__":
+    s = sys.stdin.read().rstrip('\\r\\n')
+    sol = Solution()
+    res = sol.solve(s)
+    if isinstance(res, bool):
+        print(str(res).lower())
+    else:
+        print(res)
+"""
+        return source + "\n" + driver
+
+    elif language == "cpp":
+        if is_array:
+            driver = """
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    string line;
+    if (getline(cin, line)) {
+        line.erase(remove(line.begin(), line.end(), '['), line.end());
+        line.erase(remove(line.begin(), line.end(), ']'), line.end());
+        stringstream ss(line);
+        vector<int> nums;
+        string token;
+        while (getline(ss, token, ',')) {
+            if (!token.empty()) {
+                nums.push_back(stoi(token));
+            }
+        }
+        Solution solution;
+        auto res = solution.solve(nums);
+        cout << boolalpha << res << endl;
+    }
+    return 0;
+}
+"""
+        else:
+            driver = """
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string s;
+    if (getline(cin, s)) {
+        Solution solution;
+        auto res = solution.solve(s);
+        cout << boolalpha << res << endl;
+    }
+    return 0;
+}
+"""
+        return source + "\n" + driver
+
+    return source
+
+
 def _b64_decode(value: str) -> str:
     if not value:
         return ""
@@ -53,9 +163,14 @@ def execute(submission: Submission) -> SubmissionResult:
 
     source = _b64_decode(submission.source_code)
     stdin = _b64_decode(submission.stdin)
+    
+    is_array = stdin.strip().startswith('[') and stdin.strip().endswith(']')
+    source = _wrap_source(source, submission.language, is_array)
+    
     expected = _b64_decode(submission.expected_output).strip()
     mem_limit = f"{submission.memory_limit}m"
     command = lang.get_command(lang.FILENAME, "input.txt")
+
 
     container = None
     try:

@@ -20,10 +20,6 @@
     font-weight: 800;
     letter-spacing: -1px;
     margin: 0 0 6px 0;
-    background: linear-gradient(135deg, #ffffff, #e2b13c);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .lobby-subtitle {
@@ -70,6 +66,16 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+/* Two selects in one row */
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row .form-group {
+    flex: 1;
 }
 
 .form-group {
@@ -133,7 +139,8 @@
     box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
 }
 
-.btn-secondary {
+
+ .btn-secondary {
     background: #252526;
     border: 1px solid #3c3c3c;
     color: #cccccc;
@@ -143,11 +150,7 @@
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.2s;
-}
+} 
 
-.btn-secondary:hover {
-    background: #2d2d2d;
-    border-color: #e2b13c;
-    color: #ffffff;
-    box-shadow: 0 0 15px rgba(226, 177, 60, 0.15);
-}
+
+

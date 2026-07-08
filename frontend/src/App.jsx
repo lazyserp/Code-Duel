@@ -7,6 +7,7 @@ import Register from './components/Register'
 import Lobby from './components/Lobby'
 import Arena from './components/Arena'
 import Leaderboard from './components/Leaderboard'
+import Landing from './components/Landing'
 import './App.css'
 import ProtectedRoute from './components/ProtectedRoute'
 function App() {
@@ -14,7 +15,7 @@ function App() {
   return (
     <BrowserRouter>
      <Routes>
-      <Route path='/' element={<Login/>} />
+      <Route path='/' element={<Landing/>} />
       <Route path='/login' element={<Login/>} />
       <Route path='/register' element={<Register/>} />
 

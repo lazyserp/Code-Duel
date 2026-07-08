@@ -6,6 +6,7 @@ import "./Lobby.css"
 function Lobby() {
     const navigate = useNavigate();
     const [difficulty, setDifficulty] = useState("EASY");
+    const [language, setLanguage] = useState("java");
     const [status, setStatus] = useState("");
     const username = localStorage.getItem("username");
     const [elo,setElo] = useState(null)
@@ -28,6 +29,7 @@ function Lobby() {
         try {
             const token = localStorage.getItem("token");
             const userId = localStorage.getItem("userId");
+            localStorage.setItem("language", language);
 
             const response = await axios.post(
                 "http://localhost:8080/api/matchmaking/join",
@@ -119,15 +121,29 @@ function Lobby() {
             <div className="lobby-form">
                 <div className="form-group">
                     <label className="form-label" htmlFor="difficulty-select">Select Difficulty</label>
-                    <select 
+                    <select
                         id="difficulty-select"
-                        className="lobby-select" 
-                        value={difficulty} 
+                        className="lobby-select"
+                        value={difficulty}
                         onChange={(e) => setDifficulty(e.target.value)}
                     >
-                        <option value="EASY">EASY</option>
-                        <option value="MEDIUM">MEDIUM</option>
-                        <option value="HARD">HARD</option>
+                        <option value="EASY">Easy</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HARD">Hard</option>
+                    </select>
+                </div>
+
+                <div className="form-group">
+                    <label className="form-label" htmlFor="language-select">Select Language</label>
+                    <select
+                        id="language-select"
+                        className="lobby-select"
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                    >
+                        <option value="java">Java</option>
+                        <option value="python">Python</option>
+                        <option value="cpp">C++</option>
                     </select>
                 </div>
 

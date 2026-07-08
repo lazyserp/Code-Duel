@@ -2,9 +2,7 @@ package com.codeduel.codeduel.submission.service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -35,123 +33,9 @@ public class CodeExecutorService {
     @Value("${executor.url:http://localhost:2358}")
     private String executorUrl;
 
-    // Static mapping of problem titles to their execution runner wrappers
-    private static final Map<String, String> RUNNER_WRAPPERS = new HashMap<>();
-
-    static {
-        RUNNER_WRAPPERS.put("Contains Duplicate",
-            "import java.io.*;\n" +
-            "import java.util.*;\n" +
-            "public class Main {\n" +
-            "    public static void main(String[] args) throws Exception {\n" +
-            "        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n" +
-            "        String line = br.readLine();\n" +
-            "        if (line == null) return;\n" +
-            "        line = line.trim();\n" +
-            "        if (line.startsWith(\"[\")) line = line.substring(1);\n" +
-            "        if (line.endsWith(\"]\")) line = line.substring(0, line.length() - 1);\n" +
-            "        if (line.isEmpty()) {\n" +
-            "            System.out.print(new Solution().containsDuplicate(new int[0]));\n" +
-            "            return;\n" +
-            "        }\n" +
-            "        int[] nums = Arrays.stream(line.split(\",\"))\n" +
-            "                           .map(String::trim)\n" +
-            "                           .mapToInt(Integer::parseInt)\n" +
-            "                           .toArray();\n" +
-            "        System.out.print(new Solution().containsDuplicate(nums));\n" +
-            "    }\n" +
-            "}\n"
-        );
-
-        RUNNER_WRAPPERS.put("Valid Anagram",
-            "import java.io.*;\n" +
-            "public class Main {\n" +
-            "    public static void main(String[] args) throws Exception {\n" +
-            "        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n" +
-            "        String s = br.readLine();\n" +
-            "        String t = br.readLine();\n" +
-            "        if (s == null) s = \"\";\n" +
-            "        if (t == null) t = \"\";\n" +
-            "        System.out.print(new Solution().isAnagram(s.trim(), t.trim()));\n" +
-            "    }\n" +
-            "}\n"
-        );
-
-        RUNNER_WRAPPERS.put("Two Sum",
-            "import java.io.*;\n" +
-            "import java.util.*;\n" +
-            "public class Main {\n" +
-            "    public static void main(String[] args) throws Exception {\n" +
-            "        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n" +
-            "        String line1 = br.readLine();\n" +
-            "        String line2 = br.readLine();\n" +
-            "        if (line1 == null || line2 == null) return;\n" +
-            "        line1 = line1.trim();\n" +
-            "        if (line1.startsWith(\"[\")) line1 = line1.substring(1);\n" +
-            "        if (line1.endsWith(\"]\")) line1 = line1.substring(0, line1.length() - 1);\n" +
-            "        int[] nums = Arrays.stream(line1.split(\",\"))\n" +
-            "                           .map(String::trim)\n" +
-            "                           .mapToInt(Integer::parseInt)\n" +
-            "                           .toArray();\n" +
-            "        int target = Integer.parseInt(line2.trim());\n" +
-            "        int[] res = new Solution().twoSum(nums, target);\n" +
-            "        System.out.print(\"[\" + res[0] + \",\" + res[1] + \"]\");\n" +
-            "    }\n" +
-            "}\n"
-        );
-
-        RUNNER_WRAPPERS.put("Best Time to Buy and Sell Stock",
-            "import java.io.*;\n" +
-            "import java.util.*;\n" +
-            "public class Main {\n" +
-            "    public static void main(String[] args) throws Exception {\n" +
-            "        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n" +
-            "        String line = br.readLine();\n" +
-            "        if (line == null) return;\n" +
-            "        line = line.trim();\n" +
-            "        if (line.startsWith(\"[\")) line = line.substring(1);\n" +
-            "        if (line.endsWith(\"]\")) line = line.substring(0, line.length() - 1);\n" +
-            "        int[] prices = Arrays.stream(line.split(\",\"))\n" +
-            "                             .map(String::trim)\n" +
-            "                             .mapToInt(Integer::parseInt)\n" +
-            "                             .toArray();\n" +
-            "        System.out.print(new Solution().maxProfit(prices));\n" +
-            "    }\n" +
-            "}\n"
-        );
-
-        RUNNER_WRAPPERS.put("Valid Parentheses",
-            "import java.io.*;\n" +
-            "public class Main {\n" +
-            "    public static void main(String[] args) throws Exception {\n" +
-            "        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));\n" +
-            "        String s = br.readLine();\n" +
-            "        if (s == null) s = \"\";\n" +
-            "        s = s.trim();\n" +
-            "        if (s.startsWith(\"\\\"\") && s.endsWith(\"\\\"\")) s = s.substring(1, s.length() - 1);\n" +
-            "        System.out.print(new Solution().isValid(s));\n" +
-            "    }\n" +
-            "}\n"
-        );
-    }
-
-    public ExecutionResult evaluate(String problemTitle, String testCasesJson, String userCodeText, String language) {
+    public ExecutionResult evaluate(String testCasesJson, String userCodeText, String language) {
         try {
-            String wrapper = RUNNER_WRAPPERS.get(problemTitle);
-            if (wrapper == null) {
-                throw new IllegalArgumentException("No runner wrapper template found for problem: " + problemTitle);
-            }
-
-            // For non-java languages, we don't have wrappers seeded in Java.
-            // If it is Java, we prefix the wrapper runner class.
-            String sourceCode;
-            if ("java".equalsIgnoreCase(language)) {
-                sourceCode = wrapper + "\n" + userCodeText;
-            } else {
-                sourceCode = userCodeText;
-            }
-
-            String base64Source = Base64.getEncoder().encodeToString(sourceCode.getBytes(StandardCharsets.UTF_8));
+            String base64Source = Base64.getEncoder().encodeToString(userCodeText.getBytes(StandardCharsets.UTF_8));
 
             log.info("Raw test cases JSON from DB: {}", testCasesJson);
             List<TestCase> testCases = objectMapper.readValue(testCasesJson, new TypeReference<List<TestCase>>() {});

@@ -1,0 +1,430 @@
+/* d:\Wissen Practice\CodeDuel\codeduel\frontend\src\components\Landing.css */
+
+.landing-container {
+    width: 100%;
+    min-height: 100vh;
+    background: #121212;
+    /* Create the gold/amber cosmic flare behind everything matching Arena */
+
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: #e2e8f0;
+    overflow-x: hidden;
+    padding-bottom: 80px;
+}
+
+/* Header Navbar Styles */
+.landing-header {
+    width: 100%;
+    max-width: 1200px;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    box-sizing: border-box;
+    z-index: 10;
+}
+
+.brand-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.brand-logo-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 0 8px rgba(226, 177, 60, 0.6));
+}
+
+.brand-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.landing-nav {
+    display: flex;
+    gap: 30px;
+}
+
+.nav-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    color: #ffffff;
+}
+
+.header-actions .btn-login {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.header-actions .btn-login:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Hero Section */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 850px;
+    padding: 60px 20px 40px 20px;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.hero-badge {
+    background: rgba(226, 177, 60, 0.1);
+    border: 1px solid rgba(226, 177, 60, 0.3);
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #e2b13c;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-title {
+    font-size: 3.8rem;
+    font-weight: 850;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin: 0 0 20px 0;
+    color: #ffffff;
+    background: linear-gradient(180deg, #ffffff 60%, rgba(255, 255, 255, 0.75) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.15rem;
+    color: #94a3b8;
+    max-width: 680px;
+    line-height: 1.6;
+    margin: 0 0 35px 0;
+}
+
+.btn-purple-cta {
+    background: linear-gradient(135deg, #e2b13c 0%, #c59620 100%);
+    color: #121212;
+    border: none;
+    padding: 16px 36px;
+    border-radius: 9999px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+ 
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-purple-cta:hover {
+    transform: translateY(-2px);
+
+}
+
+/* IDE / Editor Mockup Styles */
+.editor-mockup {
+    width: 90%;
+    max-width: 1000px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    box-shadow: 
+        0 30px 70px rgba(0, 0, 0, 0.6),
+        0 0 100px rgba(226, 177, 60, 0.04);
+    overflow: hidden;
+    margin-top: 40px;
+    z-index: 5;
+    position: relative;
+    backdrop-filter: blur(20px);
+}
+
+/* Mock Window Header */
+.mockup-header {
+    height: 42px;
+    background: #282828;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    position: relative;
+}
+
+.window-controls {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    left: 16px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.mockup-address-bar {
+    margin: 0 auto;
+    width: 320px;
+    height: 24px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.lock-icon {
+    font-size: 0.7rem;
+    color: #10b981;
+}
+
+/* Mockup Layout Workspace */
+.mockup-workspace {
+    display: grid;
+    grid-template-columns: 180px 1fr 280px;
+    height: 480px;
+    background: #1a1a1a;
+}
+
+/* Left Sidebar */
+.mockup-sidebar {
+    background: #282828;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar-title {
+    color: #666666;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-item {
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.sidebar-item.active {
+    background: rgba(226, 177, 60, 0.12);
+    color: #e2b13c;
+    font-weight: 600;
+}
+
+/* Center Code Panel */
+.mockup-editor {
+    background: #1e1e1e;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-tabs {
+    height: 36px;
+    background: #252526;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+}
+
+.editor-tab {
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: #64748b;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+}
+
+.editor-tab.active {
+    background: #1e1e1e;
+    color: #e2e8f0;
+    border-top: 2px solid #e2b13c;
+}
+
+.editor-code {
+    padding: 20px;
+    margin: 0;
+    font-family: 'Fira Code', 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #f8fafc;
+    overflow-y: auto;
+    text-align: left;
+}
+
+/* Code Highlights tokens */
+.token.keyword { color: #f43f5e; }
+.token.function { color: #38bdf8; }
+.token.string { color: #10b981; }
+.token.number { color: #fbbf24; }
+.token.comment { color: #64748b; }
+.token.className { color: #e2b13c; }
+
+/* Right Chat Panel */
+.mockup-chat {
+    background: #1c1c1c;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.chat-header {
+    height: 36px;
+    background: #252526;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 0.75rem;
+    color: #e2b13c;
+    font-weight: 600;
+    gap: 6px;
+}
+
+.chat-messages {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.chat-bubble {
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    max-width: 85%;
+}
+
+.chat-bubble.ai {
+    background: rgba(226, 177, 60, 0.08);
+    border: 1px solid rgba(226, 177, 60, 0.2);
+    color: #e2b13c;
+    align-self: flex-start;
+}
+
+.chat-bubble.user {
+    background: #2a2a2a;
+    color: #f1f5f9;
+    align-self: flex-end;
+}
+
+.chat-input-area {
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    gap: 8px;
+}
+
+.chat-mock-input {
+    flex-grow: 1;
+    background: #121212;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 0.75rem;
+    color: #555555;
+}
+
+.chat-send-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: #e2b13c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a1a1a;
+    font-weight: 750;
+    font-size: 0.8rem;
+    border: none;
+    cursor: pointer;
+}
+
+/* Responsive Rules */
+@media (max-width: 1024px) {
+    .mockup-workspace {
+        grid-template-columns: 1fr 240px;
+    }
+    .mockup-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .landing-header {
+        padding: 0 20px;
+    }
+    .landing-nav {
+        display: none;
+    }
+    .hero-title {
+        font-size: 2.6rem;
+    }
+    .mockup-workspace {
+        grid-template-columns: 1fr;
+    }
+    .mockup-chat {
+        display: none;
+    }
+}

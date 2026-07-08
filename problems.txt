@@ -1,0 +1,435 @@
+I'll generate 30 unique, engaging problems - 15 focused on string manipulation and 15 on array operations. Each problem will have a compelling story wrapper and be completely original while using well-known ad-hoc algorithms.
+
+```sql
+-- V1__seed_string_and_array_problems.sql
+
+INSERT INTO problems (id, title, description, difficulty, test_cases, starter_code) VALUES
+
+-- STRING PROBLEMS (15)
+
+(
+  gen_random_uuid(),
+  'The Signal Decoder',
+  'You are a cryptographer for the Resistance. Enemy transmissions arrive as strings of lowercase letters, but their true message is hidden in plain sight. Your intelligence unit discovered that the real message consists of the first and last characters of every word. Help decode the transmission before the enemy strikes at dawn.
+
+Given a string `s` containing words separated by single spaces, extract the first and last character of each word and concatenate them in order to reveal the hidden message.
+
+**Example 1:**
+```
+Input: "hello world"
+Output: "hold"
+```
+**Example 2:**
+```
+Input: "the quick brown fox"
+Output: "teknx"
+```',
+  'EASY',
+  '[{"input":"hello world","output":"hold"},{"input":"the quick brown fox","output":"teknx"},{"input":"a","output":"aa"},{"input":"code duel","output":"cel"},{"input":"x","output":"xx"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Password Strength Checker',
+  'As a security engineer at a major bank, you must enforce strong password policies. Your system flags passwords that are exactly the same when read forwards and backwards - these are considered too predictable and must be rejected. Given a password string, determine if it is a palindrome (ignoring case).
+
+**Example 1:**
+```
+Input: "Racecar"
+Output: true
+```
+**Example 2:**
+```
+Input: "hello"
+Output: false
+```',
+  'EASY',
+  '[{"input":"Racecar","output":"true"},{"input":"hello","output":"false"},{"input":"A","output":"true"},{"input":"Noon","output":"true"},{"input":"abc","output":"false"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The DNA Fragment Analyzer',
+  'You are a bioinformatician studying viral DNA sequences. Viruses mutate by swapping pairs of nucleotides - adenine (A) with thymine (T) and cytosine (C) with guanine (G). Your task is to generate the complementary strand for a given DNA sequence to understand the virus''s replication strategy.
+
+Given a string `s` containing only A, T, C, G, return the complement where A↔T and C↔G.
+
+**Example 1:**
+```
+Input: "ATCG"
+Output: "TAGC"
+```
+**Example 2:**
+```
+Input: "GCTA"
+Output: "CGAT"
+```',
+  'EASY',
+  '[{"input":"ATCG","output":"TAGC"},{"input":"GCTA","output":"CGAT"},{"input":"A","output":"T"},{"input":"AAAACCCC","output":"TTTTGGGG"},{"input":"G","output":"C"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Server Log Parser',
+  'You are a DevOps engineer monitoring a critical web server. The server logs contain timestamps with the format "HH:MM:SS". A security team has identified that suspicious activity only occurs during the night shift - between 00:00:00 and 05:59:59. Given a timestamp string, determine if the activity occurred during the night shift.
+
+**Example 1:**
+```
+Input: "03:15:30"
+Output: true
+```
+**Example 2:**
+```
+Input: "12:00:00"
+Output: false
+```',
+  'EASY',
+  '[{"input":"03:15:30","output":"true"},{"input":"12:00:00","output":"false"},{"input":"00:00:00","output":"true"},{"input":"05:59:59","output":"true"},{"input":"06:00:00","output":"false"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Message Compressor',
+  'You are building a communication system for deep-space probes. To save bandwidth, messages are compressed by removing all vowels (a, e, i, o, u). Given a lowercase string, return the compressed version with vowels removed.
+
+**Example 1:**
+```
+Input: "hello"
+Output: "hll"
+```
+**Example 2:**
+```
+Input: "universe"
+Output: "nvrs"
+```',
+  'EASY',
+  '[{"input":"hello","output":"hll"},{"input":"universe","output":"nvrs"},{"input":"a","output":""},{"input":"bcdfg","output":"bcdfg"},{"input":"aeiou","output":""}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Train Schedule Validator',
+  'You are a train dispatcher at a busy station. Each train has a unique 4-digit code. Your system validates a train''s code by checking if the first two digits are smaller than the last two digits (treating each pair as a two-digit number). Determine if a given 4-digit code is valid.
+
+**Example 1:**
+```
+Input: "1234"
+Output: true
+```
+**Example 2:**
+```
+Input: "3412"
+Output: false
+```',
+  'EASY',
+  '[{"input":"1234","output":"true"},{"input":"3412","output":"false"},{"input":"0102","output":"true"},{"input":"9998","output":"false"},{"input":"0000","output":"false"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Musical Scale Analyzer',
+  'You are a music theory professor analyzing ancient compositions. You discovered that melodies written in a minor key have more occurrences of the letter "a" than the letter "e" in their textual notation. Given a string representing a musical piece, determine if it was written in minor key.
+
+**Example 1:**
+```
+Input: "aabbccee"
+Output: false
+```
+**Example 2:**
+```
+Input: "aaaeee"
+Output: false
+```',
+  'EASY',
+  '[{"input":"aabbccee","output":"false"},{"input":"aaaeee","output":"false"},{"input":"aaa","output":"true"},{"input":"eee","output":"false"},{"input":"abcde","output":"false"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Email Validator',
+  'You are building a sign-up system for a social media platform. You need to validate email addresses - an email is valid if it contains exactly one "@" symbol and at least one "." after the "@". Given an email string, determine if it is valid.
+
+**Example 1:**
+```
+Input: "user@domain.com"
+Output: true
+```
+**Example 2:**
+```
+Input: "user@domain"
+Output: false
+```',
+  'EASY',
+  '[{"input":"user@domain.com","output":"true"},{"input":"user@domain","output":"false"},{"input":"@domain.com","output":"false"},{"input":"user@domain.co.uk","output":"true"},{"input":"usermail.com","output":"false"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Numeric Password Decoder',
+  'You are a security analyst tasked with cracking a simple password system. The system encodes passwords by replacing each letter with its position in the alphabet (1-26). Given a string of space-separated numbers, decode the password back to letters. For example, "8 5 12 12 15" becomes "hello".
+
+**Example 1:**
+```
+Input: "8 5 12 12 15"
+Output: "hello"
+```
+**Example 2:**
+```
+Input: "23 15 18 12 4"
+Output: "world"
+```',
+  'EASY',
+  '[{"input":"8 5 12 12 15","output":"hello"},{"input":"23 15 18 12 4","output":"world"},{"input":"1","output":"a"},{"input":"26","output":"z"},{"input":"3 15 4 5","output":"code"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The DNA Pattern Matcher',
+  'You are a forensic scientist analyzing DNA samples. A DNA sequence is represented as a string of characters "A", "T", "G", "C". You need to identify if a specific pattern occurs at the beginning of the DNA strand. Given a DNA string and a pattern, check if the pattern appears at the start of the DNA.
+
+**Example 1:**
+```
+Input: "ATCGATCG"
+Pattern: "ATC"
+Output: true
+```
+**Example 2:**
+```
+Input: "GCTAGCTA"
+Pattern: "ATC"
+Output: false
+```',
+  'EASY',
+  '[{"input":"ATCGATCG\nATC","output":"true"},{"input":"GCTAGCTA\nATC","output":"false"},{"input":"A\nA","output":"true"},{"input":"ABC\nD","output":"false"},{"input":"AAAA\nAAA","output":"true"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String dna = sc.nextLine().trim();\n        String pattern = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"dna = input().strip()\npattern = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string dna, pattern;\n    getline(cin, dna);\n    getline(cin, pattern);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Phone Number Formatter',
+  'You are developing a customer database system. Phone numbers come in various formats. Your task is to extract only the digits from a phone number string. For example, "(123) 456-7890" should become "1234567890". Given a phone number string, return only the digits.
+
+**Example 1:**
+```
+Input: "(123) 456-7890"
+Output: "1234567890"
+```
+**Example 2:**
+```
+Input: "555-555-5555"
+Output: "5555555555"
+```',
+  'EASY',
+  '[{"input":"(123) 456-7890","output":"1234567890"},{"input":"555-555-5555","output":"5555555555"},{"input":"123","output":"123"},{"input":"","output":""},{"input":"+1 (800) 555-1234","output":"18005551234"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Inventory Counter',
+  'You are a warehouse manager doing inventory. Items are labeled with codes like "A3", "B12", "C5" where letters indicate category and numbers indicate quantity. Your task is to count how many items have a quantity greater than 10.
+
+**Example 1:**
+```
+Input: "A3 B12 C5 D15"
+Output: 2
+```
+**Example 2:**
+```
+Input: "A1 B2 C3"
+Output: 0
+```',
+  'EASY',
+  '[{"input":"A3 B12 C5 D15","output":"2"},{"input":"A1 B2 C3","output":"0"},{"input":"A20","output":"1"},{"input":"","output":"0"},{"input":"A100 B1 C50","output":"2"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(0);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(0)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << 0 << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Language Classifier',
+  'You are a computational linguist analyzing text from social media. You''ve discovered that English words contain more vowels than consonants, while Klingon words have fewer vowels than consonants. Given a lowercase word, determine if it''s English (more vowels than consonants) or Klingon (more consonants than vowels).
+
+**Example 1:**
+```
+Input: "hello"
+Output: "English"
+```
+**Example 2:**
+```
+Input: "klingon"
+Output: "English"
+```',
+  'EASY',
+  '[{"input":"hello","output":"English"},{"input":"klingon","output":"English"},{"input":"a","output":"English"},{"input":"bcdfg","output":"Klingon"},{"input":"aeiou","output":"English"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Product Code Validator',
+  'You work in quality control at a factory. Product codes consist of 3 letters followed by 4 digits. A code is valid if the first and third letters are vowels, and the sum of the digits is even. Given a product code string, determine if it is valid.
+
+**Example 1:**
+```
+Input: "ABC1234"
+Output: true
+```
+**Example 2:**
+```
+Input: "XYZ5678"
+Output: false
+```',
+  'EASY',
+  '[{"input":"ABC1234","output":"true"},{"input":"XYZ5678","output":"false"},{"input":"AEA1111","output":"false"},{"input":"ABC1112","output":"true"},{"input":"AAA0000","output":"true"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Temperature Converter',
+  'You are a meteorologist analyzing international weather data. Weather stations around the world report temperatures as strings like "25C" for Celsius and "77F" for Fahrenheit. Your task is to convert Celsius to Fahrenheit using the formula: F = (C * 9/5) + 32. Given a temperature string like "25C", return the Fahrenheit value as an integer.
+
+**Example 1:**
+```
+Input: "25C"
+Output: "77F"
+```
+**Example 2:**
+```
+Input: "0C"
+Output: "32F"
+```',
+  'EASY',
+  '[{"input":"25C","output":"77F"},{"input":"0C","output":"32F"},{"input":"100C","output":"212F"},{"input":"-40C","output":"-40F"},{"input":"1C","output":"34F"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}'
+),
+
+-- ARRAY PROBLEMS (15)
+
+(
+  gen_random_uuid(),
+  'The Elevator Maintenance Scheduler',
+  'You are an elevator technician in a skyscraper. Each elevator has a maintenance priority level stored in an array. Your task is to find the minimum value in the array - this indicates which elevator needs maintenance first. Given an array of integers, return the minimum value.
+
+**Example 1:**
+```
+Input: [3,1,4,1,5]
+Output: 1
+```
+**Example 2:**
+```
+Input: [10,20,30]
+Output: 10
+```',
+  'EASY',
+  '[{"input":"[3,1,4,1,5]","output":"1"},{"input":"[10,20,30]","output":"10"},{"input":"[5]","output":"5"},{"input":"[-1,-2,-3]","output":"-3"},{"input":"[100]","output":"100"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(0);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\"))) if input().strip()[1:-1] else []\n# write your logic here\nprint(0)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),''[''),line.end());\n    line.erase(remove(line.begin(),line.end(),'']''),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,'','')) if(!token.empty()) nums.push_back(stoi(token));\n    // write your logic here\n    cout << 0 << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Poker Hand Analyzer',
+  'You are a professional poker player analyzing your hand. You have an array of 5 card values (2-14, where 11=J, 12=Q, 13=K, 14=A). A "straight" is 5 consecutive values. You need to check if you have a straight. Given an array, return true if it contains a straight.
+
+**Example 1:**
+```
+Input: [2,3,4,5,6]
+Output: true
+```
+**Example 2:**
+```
+Input: [10,11,12,13,14]
+Output: true
+```',
+  'EASY',
+  '[{"input":"[2,3,4,5,6]","output":"true"},{"input":"[10,11,12,13,14]","output":"true"},{"input":"[1,2,3,4,6]","output":"false"},{"input":"[5,5,5,5,5]","output":"false"},{"input":"[1,2,3,4,5]","output":"true"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\")))\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),''[''),line.end());\n    line.erase(remove(line.begin(),line.end(),'']''),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,'','')) nums.push_back(stoi(token));\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Book Shelf Organizer',
+  'You are a librarian organizing books by their page counts. You need to find if any two books have the same number of pages (a duplicate count). Given an array of page counts, return true if any duplicate exists.
+
+**Example 1:**
+```
+Input: [100,200,300,200]
+Output: true
+```
+**Example 2:**
+```
+Input: [150,250,350]
+Output: false
+```',
+  'EASY',
+  '[{"input":"[100,200,300,200]","output":"true"},{"input":"[150,250,350]","output":"false"},{"input":"[1,1,1]","output":"true"},{"input":"[42]","output":"false"},{"input":"[1,2,3,4,5,1]","output":"true"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\"))) if input().strip()[1:-1] else []\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),''[''),line.end());\n    line.erase(remove(line.begin(),line.end(),'']''),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,'','')) if(!token.empty()) nums.push_back(stoi(token));\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Shopping Cart Calculator',
+  'You are building an e-commerce platform. Customers add items with various prices to their cart. You need to calculate the total cost. Given an array of prices (integers), return the sum of all prices.
+
+**Example 1:**
+```
+Input: [10,20,30]
+Output: 60
+```
+**Example 2:**
+```
+Input: [5,5,5]
+Output: 15
+```',
+  'EASY',
+  '[{"input":"[10,20,30]","output":"60"},{"input":"[5,5,5]","output":"15"},{"input":"[0]","output":"0"},{"input":"[1,2,3,4,5]","output":"15"},{"input":"[100]","output":"100"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(0);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\"))) if input().strip()[1:-1] else []\n# write your logic here\nprint(0)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),''[''),line.end());\n    line.erase(remove(line.begin(),line.end(),'']''),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,'','')) if(!token.empty()) nums.push_back(stoi(token));\n    // write your logic here\n    cout << 0 << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Voting Tally Counter',
+  'You are an election official counting votes. Each vote is represented as an integer in an array. You need to count how many votes are greater than the average of all votes to identify above-average support. Given an array, return the count of elements greater than the average.
+
+**Example 1:**
+```
+Input: [10,20,30]
+Output: 1
+```
+**Example 2:**
+```
+Input: [5,5,5,10]
+Output: 1
+```',
+  'EASY',
+  '[{"input":"[10,20,30]","output":"1"},{"input":"[5,5,5,10]","output":"1"},{"input":"[1]","output":"0"},{"input":"[100,0,0]","output":"1"},{"input":"[1,2,3,4,5]","output":"2"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(0);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\"))) if input().strip()[1:-1] else []\n# write your logic here\nprint(0)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),''[''),line.end());\n    line.erase(remove(line.begin(),line.end(),'']''),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,'','')) if(!token.empty()) nums.push_back(stoi(token));\n    // write your logic here\n    cout << 0 << endl;\n    return 0;\n}"}'
+),
+
+(
+  gen_random_uuid(),
+  'The Birthday Candles Problem',
+  'You are planning a birthday party. You have an array of candle heights, and you want to blow out the tallest candles. Count how many candles have the maximum height.
+
+**Example 1:**
+```
+Input: [4,4,1,3]
+Output: 2
+```
+**Example 2:**
+```
+Input: [1,2,3,3]
+Output: 2
+```',
+  'EASY',
+  '[{"input":"[4,4,1,3]","output":"2"},{"input":"[1,2,3,3]","output":"2"},{"input":"[5]","output":"1"},{"input":"[1,1,1,1]","output":"4"},{"input":"[1,2,3,4,5]","output":"1"}]',
+  '{"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(0);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\"))) if input().strip()[1:-1] else []\n# write your logic here\nprint(0)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),''[''),line.end());\n    line.erase(remove(line.begin(),line.end(),'']''),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,'','')) if(!token.empty()) nums.push_back(stoi(token));\

@@ -33,7 +33,6 @@ public class SubmissionReceivedConsumer {
 
             // Call Code Executor evaluation engine
             CodeExecutorService.ExecutionResult result = codeExecutorService.evaluate(
-                submission.getProblem().getTitle(),
                 submission.getProblem().getTestCases(),
                 event.code(),
                 submission.getLanguage()

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "./Auth.css";
 
 function Login() {
     const navigate = useNavigate();
@@ -24,24 +25,43 @@ function Login() {
     }
 
     return (
-        <>
-            <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit">Log in</button>
+        <div className="auth-container">
+            <h1 className="auth-title">Welcome Back</h1>
+            <p className="auth-subtitle">Sign in to your CodeDuel account</p>
+            <form onSubmit={handleSubmit} className="auth-form">
+                <div className="form-group">
+                    <label className="form-label" htmlFor="username-input">Username</label>
+                    <input
+                        id="username-input"
+                        className="auth-input"
+                        type="text"
+                        placeholder="Enter your username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="form-group">
+                    <label className="form-label" htmlFor="password-input">Password</label>
+                    <input
+                        id="password-input"
+                        className="auth-input"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
+                <button type="submit" className="btn-primary">Log In</button>
             </form>
-        </>
+            <div className="auth-link-container">
+                Don't have an account? 
+                <span className="auth-link" onClick={() => navigate("/register")}>
+                    Register here
+                </span>
+            </div>
+        </div>
     );
 }
 

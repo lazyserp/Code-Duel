@@ -5,24 +5,132 @@ import { Editor } from "@monaco-editor/react";
 import { Client } from "@stomp/stompjs";
 import "./Arena.css";
 
+
+
+function renderDescription(text) {
+    if (!text) return null;
+    const lines = text.split("\n");
+    const nodes = [];
+    let i = 0;
+    let keyCounter = 0;
+    const key = () => `desc-${keyCounter++}`;
+
+    function formatInline(str) {
+        const parts = [];
+        const segments = str.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+        segments.forEach((seg, idx) => {
+            if (seg.startsWith("`") && seg.endsWith("`")) {
+                parts.push(<code key={idx} className="">{seg.slice(3, -1)}</code>);
+            } else if (seg.startsWith("**") && seg.endsWith("**")) {
+                parts.push(<strong key={idx}>{seg.slice(2, -2)}</strong>);
+            } else {
+                parts.push(seg);
+            }
+        });
+        return parts;
+    }
+
+    while (i < lines.length) {
+        const line = lines[i].trim();
+        if (line === "") { i++; continue; }
+
+        if (/^(Example \d+:|Constraints:|Note:|Follow[- ]up:)/i.test(line)) {
+            nodes.push(<h3 key={key()} className="problem-section-header">{line}</h3>);
+            i++; continue;
+        }
+
+        if (/^Input:/i.test(line) || /^Output:/i.test(line) || /^Explanation:/i.test(line)) {
+            const blockLines = [];
+            while (i < lines.length) {
+                const bl = lines[i].trim();
+                if (/^(Input:|Output:|Explanation:)/i.test(bl) ||
+                    (bl === "" && i + 1 < lines.length && /^(Input:|Output:|Explanation:)/i.test(lines[i + 1].trim()))) {
+                    if (bl !== "") blockLines.push(bl);
+                    i++;
+                } else break;
+            }
+            nodes.push(
+                <div key={key()} className="problem-example-block">
+                    {blockLines.map((bl, idx) => {
+                        const isInput = /^Input:/i.test(bl);
+                        const isOutput = /^Output:/i.test(bl);
+                        return (
+                            <p key={idx} className={`example-io-line ${isInput ? "input-line" : isOutput ? "output-line" : "explain-line"}`}>
+                                {formatInline(bl)}
+                            </p>
+                        );
+                    })}
+                </div>
+            );
+            continue;
+        }
+
+        if (/^[-•]/.test(line)) {
+            const bullets = [];
+            while (i < lines.length && /^[-•]/.test(lines[i].trim())) {
+                bullets.push(lines[i].trim().replace(/^[-•]\s*/, ""));
+                i++;
+            }
+            nodes.push(
+                <ul key={key()} className="problem-constraints-list">
+                    {bullets.map((b, idx) => <li key={idx}>{formatInline(b)}</li>)}
+                </ul>
+            );
+            continue;
+        }
+
+        if (line.startsWith("[")) {
+            nodes.push(<div key={key()} className="problem-array-display">{line}</div>);
+            i++; continue;
+        }
+
+        nodes.push(<p key={key()} className="problem-desc-para">{formatInline(line)}</p>);
+        i++;
+    }
+    return nodes;
+}
+
+function getInitials(name) {
+    return name ? name.slice(0, 2).toUpperCase() : "??";
+}
+
 function Arena() {
     const navigate = useNavigate();
     const stompClientRef = useRef(null);
-    const [timer ,setTimer] = useState(600);
+    const defaultCodeRef = useRef("");
+
+    const [timer, setTimer] = useState(600);
     const [opponentTyping, setOpponentTyping] = useState(false);
     const [problem, setProblem] = useState(null);
     const [code, setCode] = useState("");
     const [matchStatus, setMatchStatus] = useState("ACTIVE");
+    const [matchResult, setMatchResult] = useState(null); // "WIN" | "LOSS" | "DRAW"
     const lastTypedRef = useRef(0);
     const [submitting, setSubmitting] = useState(false);
     const [hint, setHint] = useState("");
     const [fetchingHint, setFetchingHint] = useState(false);
     const [submissionResult, setSubmissionResult] = useState(null);
+    const [eloDetails, setEloDetails] = useState(null);
+    const [opponent, setOpponent] = useState(null);
     const [consoleOpen, setConsoleOpen] = useState(false);
     const [consoleHeight, setConsoleHeight] = useState(200);
     const isResizingRef = useRef(false);
     const startYRef = useRef(0);
     const startHeightRef = useRef(200);
+
+    const username = localStorage.getItem("username") || "Player";
+    const elo = localStorage.getItem("elo") || "1200";
+    const language = localStorage.getItem("language") || "java";
+
+    const opponentName = opponent ? opponent.username : "Opponent";
+    const opponentElo = opponent ? opponent.currentElo : "1200";
+
+    const langDisplayNames = {
+        java: "Java",
+        python: "Python",
+        cpp: "C++"
+    };
+    const langDisplayName = langDisplayNames[language] || language;
 
     const handleMouseDown = (e) => {
         e.preventDefault();
@@ -35,11 +143,8 @@ function Arena() {
 
     const handleMouseMove = (e) => {
         if (!isResizingRef.current) return;
-        const deltaY = startYRef.current - e.clientY;
-        const newHeight = startHeightRef.current + deltaY;
-        if (newHeight > 100 && newHeight < window.innerHeight * 0.8) {
-            setConsoleHeight(newHeight);
-        }
+        const newHeight = startHeightRef.current + (startYRef.current - e.clientY);
+        if (newHeight > 80 && newHeight < window.innerHeight * 0.7) setConsoleHeight(newHeight);
     };
 
     const handleMouseUp = () => {
@@ -48,171 +153,143 @@ function Arena() {
         document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    async function handleGetHint()
-    {
+    function handleResetCode() {
+        if (window.confirm("Reset your code to the default starter template?")) {
+            setCode(defaultCodeRef.current);
+        }
+    }
+
+    async function handleGetHint() {
         setFetchingHint(true);
         const token = localStorage.getItem("token");
         const matchId = localStorage.getItem("matchId");
-
-        try{
-
-        const response = await axios.post(`http://localhost:8080/api/matches/${matchId}/hint`,
-                                        {codeText:code},
-                                        {headers : {Authorization: `Bearer ${token}`}});
-        setHint(response.data.hintText);
-        
-        }
-        catch (error)
-        {
-            alert("Error :" + error.message);
-        }
-        finally{
+        try {
+            const response = await axios.post(
+                `http://localhost:8080/api/matches/${matchId}/hint`,
+                { codeText: code },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setHint(response.data.hintText);
+        } catch (error) {
+            alert("Error: " + error.message);
+        } finally {
             setFetchingHint(false);
-
-
         }
-
-        
     }
 
-    async function handleSubmitCode()
-    {
+    async function handleSubmitCode() {
         setSubmitting(true);
         setConsoleOpen(true);
         setSubmissionResult(null);
         const token = localStorage.getItem("token");
         const matchId = localStorage.getItem("matchId");
-
-        try{
-            const response = await axios.post("http://localhost:8080/api/submissions",
-                                            {matchId,codeText:code,language:"java"},
-                                            {headers : {Authorization: `Bearer ${token}`} });
-        }
-        catch (error)
-        {
+        try {
+            await axios.post(
+                "http://localhost:8080/api/submissions",
+                { matchId, codeText: code, language: language },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+        } catch (error) {
             alert(error.message);
             setSubmitting(false);
-
         }
-
-
     }
-    function handleCodeChange(value)
-    {
+
+    function handleCodeChange(value) {
         setCode(value);
         const now = Date.now();
-        if ( now - lastTypedRef.current > 3000)
-        {
+        if (now - lastTypedRef.current > 3000) {
             const matchId = localStorage.getItem("matchId");
-            if ( stompClientRef.current &&  stompClientRef.current.connected )
-            {
-                stompClientRef.current.publish({destination: "/app/match/typing",body: JSON.stringify({matchId})})
+            if (stompClientRef.current?.connected) {
+                stompClientRef.current.publish({
+                    destination: "/app/match/typing",
+                    body: JSON.stringify({ matchId }),
+                });
                 lastTypedRef.current = now;
             }
-
         }
     }
 
     const formatTime = (secs) => {
-        const mins = Math.floor(secs / 60);
-        const remainingSecs = secs % 60;
-        return `${mins.toString().padStart(2,'0')} : ${remainingSecs.toString().padStart(2,'0')}`;
-    }
+        const m = Math.floor(secs / 60).toString().padStart(2, "0");
+        const s = (secs % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+    };
 
-    // this hook is for setting the problem UI
     useEffect(() => {
         const matchId = localStorage.getItem("matchId");
-        if (!matchId) {
-            navigate("/lobby");
-            return;
-        }
+        if (!matchId) { navigate("/lobby"); return; }
         async function loadMatch() {
             const token = localStorage.getItem("token");
-
             try {
-                const response = await axios.get(`http://localhost:8080/api/matchmaking/${matchId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await axios.get(
+                    `http://localhost:8080/api/matchmaking/${matchId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
                 setProblem(response.data.problem);
+                
+                const currentUser = localStorage.getItem("username");
+                const oppUser = response.data.user1.username === currentUser ? response.data.user2 : response.data.user1;
+                setOpponent(oppUser);
 
                 const starterCodeObj = JSON.parse(response.data.problem.starterCode);
-                setCode(starterCodeObj.java || "");
-
+                const starterForLang = starterCodeObj[language] || "";
+                defaultCodeRef.current = starterForLang;
+                setCode(starterForLang);
                 setMatchStatus(response.data.status);
-            } catch (error) {
-                console.error("Failed to load match details:", error);
-                navigate("/lobby")
+            } catch {
+                navigate("/lobby");
             }
         }
         loadMatch();
     }, []);
 
-    // this hook is for our Websocket connection , msg sending and receiving
     useEffect(() => {
         const matchId = localStorage.getItem("matchId");
         if (!matchId) return;
         const token = localStorage.getItem("token");
-
         const stompClient = new Client();
         stompClient.brokerURL = `ws://localhost:8080/ws?token=${token}`;
         stompClient.reconnectDelay = 5000;
 
-
-        //This runs whenver our WebSocket receives a message on the connected URL
         const callBack = (message) => {
             const data = JSON.parse(message.body);
-            if ( data.winnerId !== undefined)
-            {
+            if (data.winnerId !== undefined) {
+                const myUserId = localStorage.getItem("userId");
+                const isWin = data.winnerId == myUserId;
+                setMatchResult(isWin ? "WIN" : "LOSS");
                 setMatchStatus("FINISHED");
-                if ( data.winnerId == localStorage.getItem("userId")){
-                    alert("You Won !")
-                }
-                else alert("You Lost")
-            }
 
-            if ( data.status !== undefined && data.status != "ACTIVE" && data.userId == localStorage.getItem("userId"))
-            {
-                setSubmissionResult({
-                    status: data.status,
-                    passedCount: data.passedCount,
-                    totalCount: data.totalCount,
-                    executionTime: data.executionTime
-                });
+                const change = isWin ? data.winnerEloChange : data.loserEloChange;
+                const before = isWin ? data.winnerEloBefore : data.loserEloBefore;
+                const after = isWin ? data.winnerEloAfter : data.loserEloAfter;
+                setEloDetails({ change, before, after });
+                localStorage.setItem("elo", after.toString());
+            }
+            if (data.status !== undefined && data.status !== "ACTIVE" && data.userId == localStorage.getItem("userId")) {
+                setSubmissionResult({ status: data.status, passedCount: data.passedCount, totalCount: data.totalCount, executionTime: data.executionTime });
                 setSubmitting(false);
                 setConsoleOpen(true);
             }
-            if (data.secondsRemaining == 0)
-            {
-                setMatchStatus("FINISHED");
-            }
-            if ( data.secondsRemaining  !== undefined)
-            {
-               setTimer(parseInt(data.secondsRemaining, 10));
-            }
-
-            if ( data.status != undefined)
-            {
-                setMatchStatus(data.status);
-            }
-
-            if ( data.username !== undefined && data.username != localStorage.getItem("username"))
-            {
+            if (data.secondsRemaining === 0) { setMatchResult("DRAW"); setMatchStatus("FINISHED"); }
+            if (data.secondsRemaining !== undefined) setTimer(parseInt(data.secondsRemaining, 10));
+            if (data.status !== undefined) setMatchStatus(data.status);
+            if (data.username !== undefined && data.username !== localStorage.getItem("username")) {
                 setOpponentTyping(true);
-                setTimeout( () => setOpponentTyping(false),2000);
+                setTimeout(() => setOpponentTyping(false), 2000);
             }
-        }
+        };
 
         stompClient.onConnect = () => {
-            stompClient.subscribe(`/topic/match/${matchId}`, callBack)
-            stompClient.publish({destination: "/app/match/ready",body: JSON.stringify({ matchId }) });
-        } 
-
+            stompClient.subscribe(`/topic/match/${matchId}`, callBack);
+            stompClient.publish({ destination: "/app/match/ready", body: JSON.stringify({ matchId }) });
+        };
         stompClient.activate();
         stompClientRef.current = stompClient;
-        return () => { stompClient.deactivate(); };
-    },[]);
-
-
+        return () => {
+            stompClient.deactivate();
+        };
+    }, []);
 
     function returnToLobby() {
         localStorage.removeItem("matchId");
@@ -220,176 +297,228 @@ function Arena() {
     }
 
     function handleForfeit() {
-        if (window.confirm("Are you sure you want to forfeit this match? You will lose ELO.")) {
+        if (window.confirm("Are you sure you want to Give up? You will lose ELO.")) {
             const matchId = localStorage.getItem("matchId");
-            if (stompClientRef.current && stompClientRef.current.connected) {
-                stompClientRef.current.publish({
-                    destination: "/app/match/forfeit",
-                    body: JSON.stringify({ matchId })
-                });
-            } else {
-                returnToLobby();
-            }
+            if (stompClientRef.current?.connected) {
+                stompClientRef.current.publish({ destination: "/app/match/forfeit", body: JSON.stringify({ matchId }) });
+            } else returnToLobby();
         }
     }
 
     if (!problem) {
         return (
-            <div className="leaderboard-loading">
+            <div className="arena-loading">
                 <div className="spinner"></div>
-                <p>Loading Arena Workspace...</p>
-                
+                <p>Loading Arena...</p>
             </div>
         );
     }
 
     if (matchStatus === "FINISHED") {
+        const results = {
+            WIN:  { text: "You Won! 🎉",      sub: "Excellent work!",              color: "#10b981" },
+            LOSS: { text: "You Lost 😔",       sub: "Better luck next time.",       color: "#ef4444" },
+            DRAW: { text: "Match Drawn ⏱",    sub: "Time ran out  no one solved it.", color: "#e2b13c" },
+        };
+        const r = results[matchResult] || results.DRAW;
         return (
             <div className="finished-container">
-                <h1 className="finished-title">Match Finished!</h1>
+                <h1 className="finished-title" style={{ color: r.color, WebkitTextFillColor: r.color }}>{r.text}</h1>
+                <p style={{ color: "#888", fontSize: "0.9rem", margin: 0, marginBottom: "15px" }}>{r.sub}</p>
+                {eloDetails && (
+                    <div className="elo-change-card" style={{ background: "#252526", border: "1px solid #3c3c3c", borderRadius: "8px", padding: "16px", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "8px", alignItems: "center" }}>
+                        <span style={{ fontSize: "0.85rem", color: "#888" }}>Rating Change</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "1.1rem" }}>
+                            <span>{eloDetails.before}</span>
+                            <span style={{ color: "#666" }}>→</span>
+                            <strong style={{ color: r.color }}>{eloDetails.after}</strong>
+                        </div>
+                        <span style={{ fontSize: "1.2rem", fontWeight: "700", color: eloDetails.change >= 0 ? "#10b981" : "#ef4444" }}>
+                            {eloDetails.change >= 0 ? `+${eloDetails.change}` : eloDetails.change} ELO
+                        </span>
+                    </div>
+                )}
                 <button className="btn-secondary" onClick={returnToLobby}>Return To Lobby</button>
             </div>
         );
     }
 
+    const timerWarning = timer <= 60;
+
     return (
         <div className="arena-container">
-            {/* 1. Header Navbar */}
+            {/* ── Top Navbar ── */}
             <div className="arena-navbar">
-                <div className="nav-section">
-                    <span className="logo-text">CodeDuel</span>
-                    <div className="nav-user-card">
-                        <span className="user-dot"></span>
-                        <span className="nav-username">{localStorage.getItem("username")}</span>
-                        <span className="nav-elo">{localStorage.getItem("elo") || "1200"} ELO</span>
+                {/* Left: current user */}
+                <div className="nav-player-section">
+                    <div className="player-avatar you">{getInitials(username)}</div>
+                    <div className="player-info">
+                        <span className="player-name">{username}</span>
+                        <div className="player-meta">
+                            <span className="player-rank-badge">⚔ Duelist</span>
+                            <span className="player-elo-badge">⭐ {elo}</span>
+                        </div>
+                    </div>
+                    <div className="player-progress">
+                        <span className="progress-label">0 / {problem ? "?" : "?"} tests</span>
+                        <div className="progress-bar"><div className="progress-fill" style={{ width: "0%" }}></div></div>
                     </div>
                 </div>
 
-                <div className="timer-container">
-                    <div className="timer-box">{formatTime(timer)}</div>
-                </div>
-
-                <div className="nav-section">
-                    {opponentTyping && <span style={{ color: "#38bdf8", fontSize: "0.8rem", marginRight: "10px" }}>Opponent typing...</span>}
-                    <div className="nav-user-card">
-                        <span className="user-dot opponent"></span>
-                        <span className="nav-username">Opponent</span>
+                {/* Center: timer */}
+                <div className="nav-center">
+                    <div className={`timer-display ${timerWarning ? "timer-warning" : ""}`}>
+                        {formatTime(timer)}
                     </div>
                 </div>
+
+                {/* Right: opponent */}
+                <div className="nav-player-section right">
+                    <div className="player-progress right-progress">
+                        <span className="progress-label">0 / {problem ? "?" : "?"} tests</span>
+                        <div className="progress-bar"><div className="progress-fill" style={{ width: "0%" }}></div></div>
+                    </div>
+                    <div className="player-info right-info">
+                        <span className="player-name">{opponentName}</span>
+                        <div className="player-meta">
+                            <span className="player-elo-badge">⭐ {opponentElo}</span>
+                            <span className={`idle-badge ${opponentTyping ? "typing" : ""}`}>
+                                {opponentTyping ? "● TYPING" : "● IDLE"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="player-avatar opponent">{getInitials(opponentName)}</div>
+                </div>
             </div>
 
-            {/* 2. Actions Sub-header Row */}
-            <div className="arena-actions-row">
-                <button className="action-link" onClick={handleForfeit}>Forfeit Match</button>
-                <span style={{ color: "#2d2d2d" }}>|</span>
-                <button className="action-link">Report Bug</button>
+            {/* ── Sub-header: actions + hint nudge ── */}
+            <div className="arena-subheader">
+                <div className="subheader-left">
+                    <button className="action-btn" onClick={() => window.location.href = "mailto:amanjha434@gmail.com?subject=CodeDuel%20Bug%20Report"}>
+                        ⚠ Report bug
+                    </button>
+                    <button className="action-btn forfeit-btn" onClick={handleForfeit}>
+                        ⚑ Give Up
+                    </button>
+                </div>
+                <div className="subheader-center">
+                    <div className="hint-nudge-bar">
+                        <span className="hint-nudge-icon"></span>
+                        <span className="hint-nudge-label">⚡ Hint</span>
+                        
+                        <button
+                            className="btn-get-hint"
+                            onClick={handleGetHint}
+                            disabled={fetchingHint || matchStatus === "FINISHED"}
+                        >
+                            {fetchingHint ? <><span className="hint-spinner"></span> Thinking...</> : "Get a hint"}
+                        </button>
+                    </div>
+                </div>
+                <div className="subheader-right"></div>
             </div>
 
-            {/* 3. Main Workspace Split-Screen */}
+            {/* ── Main workspace ── */}
             <div className="arena-workspace">
-                {/* Left Panel: Problem description */}
-                <div className="workspace-panel">
-                    <div className="panel-header">
-                         <span className="panel-title">Problem Description</span>
-                    </div>
-                    <div className="panel-body">
-                         <div className="problem-title-row">
-                             <h1>{problem.title}</h1>
-                             <span className={`difficulty-badge ${problem.difficulty.toLowerCase()}`}>
-                                 {problem.difficulty}
-                             </span>
-                         </div>
-                         <p className="problem-desc">{problem.description}</p>
+                {/* Left: Problem Panel */}
+                <div className="problem-panel">
+                    <div className="problem-panel-body">
+                        <h1 className="problem-title">{problem.title}</h1>
+                        <div className="problem-tags">
+                            <span className={`tag-difficulty ${problem.difficulty.toLowerCase()}`}>{problem.difficulty}</span>
+                            {hint && <span className="tag hint-tag">💡 Hints</span>}
+                        </div>
 
-                         {/* AI Hint Section */}
-                         <div style={{ marginTop: "30px" }}>
-                             <button 
-                                 className="btn-run" 
-                                 onClick={handleGetHint} 
-                                 disabled={fetchingHint || matchStatus === "FINISHED"}
-                             >
-                                 {fetchingHint ? "AI is thinking..." : "Request Socratic Hint"}
-                             </button>
-                             
-                             {hint && (
-                                 <div className="ai-hint-box">
-                                     <div className="ai-hint-title">
-                                         💡 AI Coach Hint
-                                     </div>
-                                     <div>{hint}</div>
-                                 </div>
-                             )}
-                         </div>
+                        <div className="problem-description">
+                            {renderDescription(problem.description)}
+                        </div>
+
+                        {hint && (
+                            <div className="ai-hint-box">
+                                <div className="ai-hint-title">💡 AI Coach Hint</div>
+                                <div className="ai-hint-body">{hint}</div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* Right Panel: Code Editor */}
-                <div className="workspace-panel">
-                    <div className="panel-header">
-                        <span className="panel-title">Code Editor</span>
-                        <select className="editor-select" value="java" disabled>
-                             <option value="java">Java 21</option>
-                        </select>
+                {/* Divider */}
+                <div className="panel-divider"></div>
+
+                {/* Right: Editor Panel */}
+                <div className="editor-panel">
+                    {/* Editor toolbar */}
+                    <div className="editor-toolbar">
+                        <div className="toolbar-left">
+                            <span className="lang-badge">{langDisplayName}</span>
+                            <span className="toolbar-dot">●</span>
+                            <span className="toolbar-auto">Auto</span>
+                        </div>
+                        <div className="toolbar-right">
+                            <button className="toolbar-icon-btn" onClick={handleResetCode} title="Reset code" disabled={matchStatus === "FINISHED"}>↺</button>
+                        </div>
                     </div>
+
+                    {/* Monaco Editor */}
                     <div className="editor-wrapper">
-                         <Editor
-                             height="100%"
-                             language="java"
-                             theme="vs-dark"
-                             value={code}
-                             onChange={handleCodeChange}
-                             options={{
-                                 fontSize: 14,
-                                 minimap: { enabled: false },
-                                 automaticLayout: true
-                             }}
-                         />
+                        <Editor
+                            height="100%"
+                            language={language}
+                            theme="vs-dark"
+                            value={code}
+                            onChange={handleCodeChange}
+                            options={{
+                                fontSize: 14,
+                                minimap: { enabled: false },
+                                automaticLayout: true,
+                                fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                                fontLigatures: true,
+                                scrollBeyondLastLine: false,
+                                tabSize: 4,
+                                lineNumbers: "on",
+                            }}
+                        />
                     </div>
 
                     {/* Console Drawer */}
                     {consoleOpen && (
                         <div className="console-drawer" style={{ height: `${consoleHeight}px` }}>
                             <div className="console-resize-handle" onMouseDown={handleMouseDown} />
-                            <div className="console-drawer-header">
-                                <span>Console Output</span>
+                            <div className="console-header">
+                                <span>Console</span>
                                 <button className="btn-close-console" onClick={() => setConsoleOpen(false)}>×</button>
                             </div>
-                            <div className="console-drawer-body">
+                            <div className="console-body">
                                 {submitting ? (
-                                    <p className="status-running">Running code and evaluating test cases...</p>
+                                    <p className="status-running">Running test cases...</p>
                                 ) : submissionResult ? (
                                     <div className="console-results">
                                         <span className={`status-badge ${submissionResult.status.toLowerCase()}`}>
-                                            {submissionResult.status.replace("_", " ")}
+                                            {submissionResult.status.replace(/_/g, " ")}
                                         </span>
                                         <div className="console-stats">
-                                            <span>Tests Passed: {submissionResult.passedCount} / {submissionResult.totalCount}</span>
-                                            <span>Execution Time: {submissionResult.executionTime} ms</span>
+                                            <span>Tests: {submissionResult.passedCount} / {submissionResult.totalCount}</span>
+                                            <span>Time: {submissionResult.executionTime} ms</span>
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="console-placeholder" style={{ color: "#64748b", margin: 0 }}>
-                                        No output yet. Run or Submit your code to see results.
-                                    </p>
+                                    <p className="console-placeholder">No output yet.</p>
                                 )}
                             </div>
                         </div>
                     )}
 
+                    {/* Footer */}
                     <div className="editor-footer">
-                         <div className="footer-left">
-                             <button className="btn-console" onClick={() => setConsoleOpen(!consoleOpen)}>Console</button>
-                         </div>
-                         <div className="footer-right">
-                             <button className="btn-run" onClick={handleSubmitCode} disabled={submitting}>Run</button>
-                             <button 
-                                 className="btn-submit" 
-                                 onClick={handleSubmitCode} 
-                                 disabled={submitting}
-                             >
-                                 {submitting ? "Evaluating..." : "Submit Code"}
-                             </button>
-                         </div>
+                        <button className="btn-console-toggle" onClick={() => setConsoleOpen(!consoleOpen)}>
+                            Console {consoleOpen ? "∧" : "∨"}
+                        </button>
+                        <div className="footer-actions">
+                            <button className="btn-run" onClick={handleSubmitCode} disabled={submitting}>Run</button>
+                            <button className="btn-submit" onClick={handleSubmitCode} disabled={submitting}>
+                                {submitting ? "Evaluating..." : "Submit"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
