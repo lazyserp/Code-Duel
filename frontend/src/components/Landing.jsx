@@ -27,10 +27,10 @@ function Landing() {
             <section className="hero-section">
 
                 <h1 className="hero-title">Next-Gen Coding Battles </h1>
-                <p className="hero-subtitle">
+                {/* <p className="hero-subtitle">
                     Experience unparalleled efficiency and precision with Socratic coding tools tailored to streamline 
                     problem-solving, empower competition, and redefine real-time skill tracking.
-                </p>
+                </p> */}
                 <button 
                     className="btn-purple-cta" 
                     onClick={() => navigate(isLoggedIn ? "/lobby" : "/register")}
