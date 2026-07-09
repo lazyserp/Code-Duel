@@ -188,7 +188,7 @@ function Arena() {
         }
     }
 
-    async function handleSubmitCode() {
+    async function handleSubmitCode(isSubmit = true) {
         setSubmitting(true);
         setConsoleOpen(true);
         setSubmissionResult(null);
@@ -199,7 +199,7 @@ function Arena() {
         try {
             await axios.post(
                 `${API_BASE_URL}/api/submissions`,
-                { matchId, codeText: code, language: language },
+                { matchId, codeText: code, language: language, isSubmit: isSubmit },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
         } catch (error) {
@@ -280,7 +280,13 @@ function Arena() {
                 localStorage.setItem("elo", after.toString());
             }
             if (data.status !== undefined && data.status !== "ACTIVE" && data.userId == localStorage.getItem("userId")) {
-                setSubmissionResult({ status: data.status, passedCount: data.passedCount, totalCount: data.totalCount, executionTime: data.executionTime });
+                setSubmissionResult({ 
+                    status: data.status, 
+                    passedCount: data.passedCount, 
+                    totalCount: data.totalCount, 
+                    executionTime: data.executionTime,
+                    errorMessage: data.errorMessage
+                });
                 setSubmitting(false);
                 setConsoleOpen(true);
             }
@@ -497,9 +503,9 @@ function Arena() {
                                 tabSize: 4,
                                 lineNumbers: "on",
                             }}
-                            {submissionError && <div className="console-error-message">{submissionError}</div>}
-
                         />
+                        {submissionError && <div className="console-error-message">{submissionError}</div>}
+
                     </div>
 
                     {/* Console Drawer */}
@@ -515,13 +521,20 @@ function Arena() {
                                     <p className="status-running">Running test cases...</p>
                                 ) : submissionResult ? (
                                     <div className="console-results">
-                                        <span className={`status-badge ${submissionResult.status.toLowerCase()}`}>
-                                            {submissionResult.status.replace(/_/g, " ")}
-                                        </span>
-                                        <div className="console-stats">
-                                            <span>Tests: {submissionResult.passedCount} / {submissionResult.totalCount}</span>
-                                            <span>Time: {submissionResult.executionTime} ms</span>
+                                        <div className="console-results-header">
+                                            <span className={`status-badge ${submissionResult.status.toLowerCase()}`}>
+                                                {submissionResult.status.replace(/_/g, " ")}
+                                            </span>
+                                            <div className="console-stats">
+                                                <span>Tests: {submissionResult.passedCount} / {submissionResult.totalCount}</span>
+                                                <span>Time: {submissionResult.executionTime} ms</span>
+                                            </div>
                                         </div>
+                                        {submissionResult.errorMessage && (
+                                            <div className="console-error-details">
+                                                <pre className="console-error-pre">{submissionResult.errorMessage}</pre>
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <p className="console-placeholder">No output yet.</p>
@@ -536,8 +549,8 @@ function Arena() {
                             Console {consoleOpen ? "∧" : "∨"}
                         </button>
                         <div className="footer-actions">
-                            <button className="btn-run" onClick={handleSubmitCode} disabled={submitting}>Run</button>
-                            <button className="btn-submit" onClick={handleSubmitCode} disabled={submitting}>
+                            <button className="btn-run" onClick={() => handleSubmitCode(false)} disabled={submitting}>Run</button>
+                            <button className="btn-submit" onClick={() => handleSubmitCode(true)} disabled={submitting}>
                                 {submitting ? "Evaluating..." : "Submit"}
                             </button>
                         </div>

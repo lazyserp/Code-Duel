@@ -77,6 +77,7 @@ public class CodeExecutorService {
             int passedCount = 0;
             int totalCount = results.size();
             SubmissionStatus firstFailedStatus = null;
+            String firstErrorMessage = null;
 
             for (ExecutorExecutionResult res : results) {
                 double time = res.getTime() != null ? res.getTime() : 0.0;
@@ -86,22 +87,41 @@ public class CodeExecutorService {
 
                 if ("ACCEPTED".equalsIgnoreCase(res.getStatus())) {
                     passedCount++;
-                } else if (firstFailedStatus == null) {
-                    try {
-                        firstFailedStatus = SubmissionStatus.valueOf(res.getStatus().toUpperCase());
-                    } catch (Exception e) {
-                        firstFailedStatus = SubmissionStatus.RUNTIME_ERROR;
+                } else {
+                    if (firstFailedStatus == null) {
+                        try {
+                            firstFailedStatus = SubmissionStatus.valueOf(res.getStatus().toUpperCase());
+                        } catch (Exception e) {
+                            firstFailedStatus = SubmissionStatus.RUNTIME_ERROR;
+                        }
+
+                        String encodedError = null;
+                        if (res.getCompile_output() != null && !res.getCompile_output().isEmpty()) {
+                            encodedError = res.getCompile_output();
+                        } else if (res.getStderr() != null && !res.getStderr().isEmpty()) {
+                            encodedError = res.getStderr();
+                        }
+
+                        if (encodedError != null) {
+                            try {
+                                byte[] decodedBytes = Base64.getDecoder().decode(encodedError);
+                                firstErrorMessage = new String(decodedBytes, StandardCharsets.UTF_8);
+                            } catch (Exception e) {
+                                firstErrorMessage = encodedError;
+                            }
+                        }
+                        log.warn("Test case failed execution. Status: {}, Time: {}s, Error: {}", 
+                            res.getStatus(), time, firstErrorMessage);
                     }
-                    log.warn("Test case failed execution. Status: {}, Time: {}s", res.getStatus(), time);
                 }
             }
 
             SubmissionStatus statusToReturn = (firstFailedStatus != null) ? firstFailedStatus : SubmissionStatus.ACCEPTED;
-            return new ExecutionResult(statusToReturn, (int) (maxTime * 1000), passedCount, totalCount);
+            return new ExecutionResult(statusToReturn, (int) (maxTime * 1000), passedCount, totalCount, firstErrorMessage);
 
         } catch (Exception e) {
             log.error("Execution error occurred during Custom Executor integration: ", e);
-            return new ExecutionResult(SubmissionStatus.RUNTIME_ERROR, 0, 0, 0);
+            return new ExecutionResult(SubmissionStatus.RUNTIME_ERROR, 0, 0, 0, e.getMessage());
         }
     }
 
@@ -163,5 +183,6 @@ public class CodeExecutorService {
         private final int executionTimeMs;
         private final int passedCount;
         private final int totalCount;
+        private final String errorMessage;
     }
 }

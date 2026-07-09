@@ -42,9 +42,17 @@ import lombok.RequiredArgsConstructor;
                                                 .codeText(request.codeText())
                                                 .language(request.language())
                                                 .status(SubmissionStatus.PENDING)
+                                                .isSubmit(request.isSubmit() != null ? request.isSubmit() : true)
                                                 .build();
             repo.save(submission);
-            SubmissionReceivedEvent response = new SubmissionReceivedEvent(submission.getId(),submission.getMatch().getId(),submission.getUser().getId(),submission.getCodeText(),submission.getLanguage());
+            SubmissionReceivedEvent response = new SubmissionReceivedEvent(
+                submission.getId(),
+                submission.getMatch().getId(),
+                submission.getUser().getId(),
+                submission.getCodeText(),
+                submission.getLanguage(),
+                submission.isSubmit()
+            );
                                                                         
             kafkaTemplate.send("submission-received",response);
 

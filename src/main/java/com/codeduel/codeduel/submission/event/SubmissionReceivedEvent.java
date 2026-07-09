@@ -10,5 +10,6 @@ public record SubmissionReceivedEvent(
     UUID matchId,
     UUID userId,
     String code,
-    String language
+    String language,
+    boolean isSubmit
 ) {};

@@ -64,6 +64,13 @@ public class Submission {
     private Integer passedCount;
     private Integer totalCount;
 
+    @Column(name = "error_message", columnDefinition = "TEXT")
+    private String errorMessage;
+
+    @Column(name = "is_submit", nullable = false)
+    @Builder.Default
+    private boolean isSubmit = true;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

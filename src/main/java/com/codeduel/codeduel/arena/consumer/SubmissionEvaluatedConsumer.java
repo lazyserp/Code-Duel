@@ -43,8 +43,8 @@ public class SubmissionEvaluatedConsumer {
         //  Broadcast the submission result to both players
         simpMessagingTemplate.convertAndSend("/topic/match/" + matchId, event);
 
-        // If status is ACCEPTED, mark the match as finished
-        if ("ACCEPTED".equalsIgnoreCase(event.status())) {
+        // If status is ACCEPTED and it is a match submission, mark the match as finished
+        if ("ACCEPTED".equalsIgnoreCase(event.status()) && event.isSubmit()) {
             try {
                 Match match = matchRepository.findById(matchId)
                     .orElseThrow(() -> new IllegalArgumentException("Match not found: " + matchId));

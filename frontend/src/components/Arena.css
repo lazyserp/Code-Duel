@@ -800,3 +800,30 @@
     margin: 0;
     line-height: 1.5;
 }
+
+.console-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.console-error-details {
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-left: 4px solid #ef4444;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 6px;
+    overflow-x: auto;
+}
+
+.console-error-pre {
+    margin: 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: #fca5a5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+}

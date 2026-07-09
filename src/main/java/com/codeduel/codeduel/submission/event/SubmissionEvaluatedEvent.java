@@ -12,5 +12,7 @@ public record SubmissionEvaluatedEvent(
     String status,
     int executionTime,
     int passedCount,
-    int totalCount
+    int totalCount,
+    String errorMessage,
+    boolean isSubmit
 ){};
