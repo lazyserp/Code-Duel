@@ -1,7 +1,9 @@
 package com.codeduel.codeduel.common.security;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +31,11 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
 
+    // Comma-separated list, e.g.:
+    // https://codeduel.pages.dev,https://app.yourdomain.com
+    @Value("${cors.allowed-origins:http://localhost:5173}")
+    private String allowedOrigins;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -49,7 +56,7 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource()
     {
         var config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
