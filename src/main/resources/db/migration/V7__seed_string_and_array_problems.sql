@@ -14,15 +14,15 @@ Given a string `s` containing words separated by single spaces, extract the firs
 **Example 1:**
 ```
 Input: "hello world"
-Output: "hold"
+Output: "howd"
 ```
 **Example 2:**
 ```
 Input: "the quick brown fox"
-Output: "teknx"
+Output: "teqkbnfx"
 ```$$,
   'EASY',
-  $$[{"input":"hello world","output":"hold"},{"input":"the quick brown fox","output":"teknx"},{"input":"a","output":"aa"},{"input":"code duel","output":"cel"},{"input":"x","output":"xx"}]$$,
+  $$[{"input":"hello world","output":"howd"},{"input":"the quick brown fox","output":"teqkbnfx"},{"input":"a","output":"aa"},{"input":"code duel","output":"cedl"},{"input":"x","output":"xx"}]$$,
   $${"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}$$
 ),
 
@@ -258,15 +258,15 @@ Output: 0
 **Example 1:**
 ```
 Input: "hello"
-Output: "English"
+Output: "Klingon"
 ```
 **Example 2:**
 ```
 Input: "klingon"
-Output: "English"
+Output: "Klingon"
 ```$$,
   'EASY',
-  $$[{"input":"hello","output":"English"},{"input":"klingon","output":"English"},{"input":"a","output":"English"},{"input":"bcdfg","output":"Klingon"},{"input":"aeiou","output":"English"}]$$,
+  $$[{"input":"hello","output":"Klingon"},{"input":"klingon","output":"Klingon"},{"input":"a","output":"English"},{"input":"bcdfg","output":"Klingon"},{"input":"aeiou","output":"English"},{"input":"area","output":"English"}]$$,
   $${"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(\"\");\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(\"\")","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"\" << endl;\n    return 0;\n}"}$$
 ),
 
@@ -277,7 +277,7 @@ Output: "English"
 
 **Example 1:**
 ```
-Input: "ABC1234"
+Input: "AEA1234"
 Output: true
 ```
 **Example 2:**
@@ -286,7 +286,7 @@ Input: "XYZ5678"
 Output: false
 ```$$,
   'EASY',
-  $$[{"input":"ABC1234","output":"true"},{"input":"XYZ5678","output":"false"},{"input":"AEA1111","output":"false"},{"input":"ABC1112","output":"true"},{"input":"AAA0000","output":"true"}]$$,
+  $$[{"input":"ABC1234","output":"false"},{"input":"XYZ5678","output":"false"},{"input":"AEA1111","output":"true"},{"input":"ABC1112","output":"false"},{"input":"AAA0000","output":"true"},{"input":"AEA1235","output":"false"}]$$,
   $${"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine().trim();\n        // write your logic here\n        System.out.println(false);\n    }\n}","python":"s = input().strip()\n# write your logic here\nprint(False)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string s; getline(cin, s);\n    // write your logic here\n    cout << \"false\" << endl;\n    return 0;\n}"}$$
 ),
 
@@ -548,7 +548,7 @@ Input: [0,1,2]
 Output: 0
 ```$$,
   'EASY',
-  $$[{"input":"[1,0,3]","output":"4"},{"input":"[0,1,2]","output":"0"},{"input":"[5,4,3,2,1]","output":"15"},{"input":"[-1,-2]","output":"0"},{"input":"[10]","output":"10"}]$$,
+  $$[{"input":"[1,0,3]","output":"4"},{"input":"[0,1,2]","output":"0"},{"input":"[5,4,3,2,1]","output":"12"},{"input":"[-1,-2]","output":"0"},{"input":"[10]","output":"10"}]$$,
   $${"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(0);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\"))) if input().strip()[1:-1] else []\n# write your logic here\nprint(0)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),'['),line.end());\n    line.erase(remove(line.begin(),line.end(),']'),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,',')) if(!token.empty()) nums.push_back(stoi(token));\n    // write your logic here\n    cout << 0 << endl;\n    return 0;\n}"}$$
 ),
 
@@ -588,7 +588,7 @@ Input: [1,2,3,4]
 Output: 0
 ```$$,
   'EASY',
-  $$[{"input":"[1,3,2,5,4]","output":"2"},{"input":"[1,2,3,4]","output":"0"},{"input":"[10,5,8,3]","output":"0"},{"input":"[1,5,1,5,1]","output":"2"},{"input":"[5,4,5,4,5]","output":"1"}]$$,
+  $$[{"input":"[1,3,2,5,4]","output":"2"},{"input":"[1,2,3,4]","output":"0"},{"input":"[10,5,8,3]","output":"1"},{"input":"[1,5,1,5,1]","output":"2"},{"input":"[5,4,5,4,5]","output":"1"}]$$,
   $${"java":"import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String line = sc.nextLine().replaceAll(\"[\\\\[\\\\]]\", \"\");\n        int[] nums = line.isEmpty() ? new int[0] : Arrays.stream(line.split(\",\")).mapToInt(Integer::parseInt).toArray();\n        // write your logic here\n        System.out.println(0);\n    }\n}","python":"nums = list(map(int, input().strip()[1:-1].split(\",\"))) if input().strip()[1:-1] else []\n# write your logic here\nprint(0)","cpp":"#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    string line; getline(cin,line);\n    line.erase(remove(line.begin(),line.end(),'['),line.end());\n    line.erase(remove(line.begin(),line.end(),']'),line.end());\n    stringstream ss(line); vector<int> nums; string token;\n    while(getline(ss,token,',')) if(!token.empty()) nums.push_back(stoi(token));\n    // write your logic here\n    cout << 0 << endl;\n    return 0;\n}"}$$
 ),
 
