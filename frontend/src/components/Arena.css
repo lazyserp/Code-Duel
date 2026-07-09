@@ -783,3 +783,20 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+
+.ai-hint-box.error {
+    background: rgba(239, 68, 68, 0.05);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+.ai-hint-box.error .ai-hint-title {
+    color: #ef4444;
+}
+.ai-hint-box.error .ai-hint-body {
+    color: #fca5a5;
+}
+.console-error-message {
+    color: #ef4444;
+    margin: 0;
+    line-height: 1.5;
+}

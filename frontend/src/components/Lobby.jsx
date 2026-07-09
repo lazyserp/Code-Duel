@@ -11,6 +11,7 @@ function Lobby() {
     const [status, setStatus] = useState("");
     const username = localStorage.getItem("username");
     const [elo,setElo] = useState(null)
+    const [error,setError] = useState("")
 
     function startCountdown() {
         let count = 5;
@@ -27,6 +28,7 @@ function Lobby() {
     }
 
     async function handleJoin() {
+        setError("")
         try {
             const token = localStorage.getItem("token");
             const userId = localStorage.getItem("userId");
@@ -57,8 +59,9 @@ function Lobby() {
                 setStatus("Match found! Redirecting...");
                 startCountdown();
             }
-        } catch (error) {
-            alert("Error occurred: " + error.message);
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to start matchmaking: " + err.message);
+
         }
     }
 
@@ -73,9 +76,9 @@ function Lobby() {
             const profileResponse = await axios.get(`${API_BASE_URL}/api/users/me`, {headers : {Authorization: `Bearer ${token}`}});
             setElo(profileResponse.data.currentElo)
         }
-        catch (error)
+        catch (err)
         {
-            alert("not found" + error.message)
+            setError("Failed to fetch profile: " +( err.response?.data?.message || err.message))
         }
 
         const userId = localStorage.getItem("userId");
@@ -107,7 +110,7 @@ function Lobby() {
         <div className="lobby-container">
             <h1 className="lobby-title">Lobby</h1>
             <p className="lobby-subtitle">Enter matchmaking for a 1v1 with a developer</p>
-
+            {error && <div className="lobby-error-box"> {error} </div>}
             <div className="lobby-profile">
                 <div className="profile-item">
                     <span className="profile-label">Competitor</span>

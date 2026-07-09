@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Auth.css";
 
+
 import { API_BASE_URL } from "../config";
 
 function Register() {
@@ -10,19 +11,21 @@ function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error,setError] = useState("")
 
     async function handleSubmit(e) {
         e.preventDefault();
+        setError("")
         try {
             await axios.post(`${API_BASE_URL}/api/auth/register`, {
                 username,
                 email,
                 password
             });
-            alert("Registration successful!");
             navigate("/login");
-        } catch (error) {
-            alert("Registration failed: " + error.message);
+        } catch (err) {
+            // Safely query response fields
+            setError(err.response?.data?.message || err.message || "Something went wrong");
         }
     }
 
@@ -30,6 +33,7 @@ function Register() {
         <div className="auth-container">
             <h1 className="auth-title">Create Account</h1>
             <p className="auth-subtitle">Join the competitive coding arena</p>
+            {error && <div className="auth-error-box"> {error} </div>}
             <form onSubmit={handleSubmit} className="auth-form">
                 <div className="form-group">
                     <label className="form-label" htmlFor="username-input">Username</label>

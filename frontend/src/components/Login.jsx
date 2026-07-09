@@ -9,8 +9,10 @@ function Login() {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [error,setError] = useState("")
 
     async function handleSubmit(e) {
+        setError("")
         e.preventDefault();
         try {
             const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
@@ -21,8 +23,9 @@ function Login() {
             localStorage.setItem("username", response.data.username);
             localStorage.setItem("userId", response.data.userId);
             navigate("/lobby");
-        } catch (error) {
-            alert("Error: Login failed!");
+        } catch (err) {
+            setError(err.response?.data?.message || "Login failed. Please check your credentials.");
+
         }
     }
 
@@ -43,8 +46,9 @@ function Login() {
                         required
                     />
                 </div>
+                {error && <div className="auth-error-box"> {error} </div>}
                 <div className="form-group">
-                    <label className="form-label" htmlFor="password-input">Password</label>
+                <label className="form-label" htmlFor="password-input">Password</label>
                     <input
                         id="password-input"
                         className="auth-input"

@@ -7,6 +7,8 @@ import "./Arena.css";
 import { API_BASE_URL, WS_BASE_URL } from "../config";
 
 
+    
+
 
 function renderDescription(text) {
     if (!text) return null;
@@ -15,6 +17,9 @@ function renderDescription(text) {
     let i = 0;
     let keyCounter = 0;
     const key = () => `desc-${keyCounter++}`;
+    
+
+
 
     function formatInline(str) {
         const parts = [];
@@ -99,6 +104,8 @@ function Arena() {
     const navigate = useNavigate();
     const stompClientRef = useRef(null);
     const defaultCodeRef = useRef("");
+    const [submissionError, setSubmissionError] = useState("");
+    const [hintError, setHintError] = useState("");
 
     const [timer, setTimer] = useState(600);
     const [opponentTyping, setOpponentTyping] = useState(false);
@@ -162,6 +169,9 @@ function Arena() {
 
     async function handleGetHint() {
         setFetchingHint(true);
+        setHintError("");
+        setHint("");
+
         const token = localStorage.getItem("token");
         const matchId = localStorage.getItem("matchId");
         try {
@@ -172,7 +182,7 @@ function Arena() {
             );
             setHint(response.data.hintText);
         } catch (error) {
-            alert("Error: " + error.message);
+            setHintError(error.response?.data?.message || error.message || "Failed to fetch hint.");
         } finally {
             setFetchingHint(false);
         }
@@ -182,6 +192,8 @@ function Arena() {
         setSubmitting(true);
         setConsoleOpen(true);
         setSubmissionResult(null);
+        setSubmissionError("");
+
         const token = localStorage.getItem("token");
         const matchId = localStorage.getItem("matchId");
         try {
@@ -191,7 +203,7 @@ function Arena() {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
         } catch (error) {
-            alert(error.message);
+            setSubmissionError(error.response?.data?.message || error.message || "Failed to submit code.");
             setSubmitting(false);
         }
     }
@@ -429,6 +441,13 @@ function Arena() {
                             <span className={`tag-difficulty ${problem.difficulty.toLowerCase()}`}>{problem.difficulty}</span>
                             {hint && <span className="tag hint-tag">💡 Hints</span>}
                         </div>
+                        {hintError && (
+                        <div className="ai-hint-box error">
+                            <div className="ai-hint-title">💡 AI Coach Error</div>
+                            <div className="ai-hint-body">{hintError}</div>
+                        </div>
+                    )}
+
 
                         <div className="problem-description">
                             {renderDescription(problem.description)}
@@ -478,6 +497,8 @@ function Arena() {
                                 tabSize: 4,
                                 lineNumbers: "on",
                             }}
+                            {submissionError && <div className="console-error-message">{submissionError}</div>}
+
                         />
                     </div>
 
